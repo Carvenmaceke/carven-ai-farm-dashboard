@@ -211,6 +211,21 @@
   .chip{font-size:12px;padding:6px 11px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--ink);}
   .chip:hover{background:var(--field-deep);}
 
+  .flow-row{display:flex;align-items:stretch;flex-wrap:wrap;gap:0;margin-bottom:10px;}
+  .flow-step{border:1px solid var(--line);background:var(--paper);padding:12px 14px;min-width:120px;flex:1;text-align:center;}
+  .flow-step .t{font-size:13px;font-weight:600;}
+  .flow-step .s{font-size:10.5px;color:var(--muted);margin-top:2px;}
+  .flow-arrow{display:flex;align-items:center;justify-content:center;padding:0 6px;color:var(--muted);font-size:16px;flex-shrink:0;}
+  .flow-step.ai{border-color:var(--ai);background:var(--ai-soft);}
+  .flow-step.ai .t{color:#144c47;}
+  @media (max-width:700px){ .flow-row{flex-direction:column;} .flow-arrow{transform:rotate(90deg);padding:4px 0;} }
+
+  .status-table{width:100%;border-collapse:collapse;border:1px solid var(--line);background:var(--paper);font-size:13px;margin-bottom:8px;}
+  .status-table th{text-align:left;font-size:11px;color:var(--muted);font-weight:600;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--field-deep);}
+  .status-table td{padding:9px 12px;border-bottom:1px solid var(--line);}
+  .status-table tr:last-child td{border-bottom:none;}
+  .pill-planned{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:2px 8px;color:var(--wheat-deep);background:#f2e6c8;}
+
   footer{padding:18px 30px 40px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);margin-top:20px;}
 
   @media (max-width:760px){
@@ -249,7 +264,7 @@
 
     <div class="rail-divider"></div>
     <h3>About this view</h3>
-    <p class="rail-note">AI Intelligence covers insights, alerts &amp; recommendations. Physical Intelligence covers sensors, cameras &amp; automation. AI Assistant lets you ask questions about the farm. Weather/soil is live; sensor, camera and automation data are demo previews pending hardware.</p>
+    <p class="rail-note">AI Intelligence covers insights, alerts &amp; recommendations. Physical Intelligence covers sensors, cameras &amp; automation. AI Assistant lets you ask questions about the farm. Architecture shows how this frontend connects to the backend AI and data pipelines. Weather/soil is live; everything else is a demo preview pending backend and hardware integration.</p>
   </div>
 
   <div class="main">
@@ -269,6 +284,8 @@
       <button class="tab" data-tab="assistant">Ask the Farm</button>
       <button class="tab" data-tab="memory">Farm Memory</button>
       <button class="tab" data-tab="reports">Reports &amp; Analytics</button>
+      <span class="tab-group-label">System</span>
+      <button class="tab" data-tab="architecture">Architecture</button>
     </div>
 
     <!-- OVERVIEW -->
@@ -386,6 +403,53 @@
       <div class="zone-tiles" id="report-tiles"></div>
       <div class="section-head"><h2>AI history</h2></div>
       <div class="log-list" id="report-history"></div>
+    </div>
+
+    <!-- ARCHITECTURE -->
+    <div class="panel" id="panel-architecture">
+      <div class="data-note demo"><span class="flag">Planning view</span><span>This shows how the frontend you're looking at is meant to connect to the backend AI orchestration and data/IoT pipeline. Nothing here is live — it documents the intended architecture so frontend and backend work line up.</span></div>
+
+      <div class="section-head"><h2>How a recommendation gets made</h2><span class="count">AI orchestration pipeline</span></div>
+      <div class="flow-row">
+        <div class="flow-step"><div class="t">Sensor Data</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="t">Farm Data</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="t">Weather</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="t">Historical Data</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step ai"><div class="t">AI</div><div class="s">CV + time-series + decision logic</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step ai"><div class="t">Insight</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step ai"><div class="t">Recommendation</div></div>
+      </div>
+
+      <div class="section-head"><h2>How reliable data reaches the AI</h2><span class="count">Data / IoT ingestion pipeline</span></div>
+      <div class="flow-row">
+        <div class="flow-step"><div class="t">Sensor</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="t">Device</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="t">Data Ingestion</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="t">Validation</div><div class="s">timestamps, offline/stale handling</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="t">Database</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step ai"><div class="t">AI</div></div>
+      </div>
+
+      <div class="section-head"><h2>Where this frontend fits</h2></div>
+      <div class="flow-row">
+        <div class="flow-step"><div class="t">Farm Management</div><div class="s">Project 1</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="t">Farm Data</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="t">Data / IoT Backend</div><div class="s">ingestion, validation, storage</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step ai"><div class="t">AI Engine</div><div class="s">orchestration &amp; decision logic</div></div><div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="t">This platform</div><div class="s">AI Intelligence · Physical Intelligence · AI Assistant</div></div>
+      </div>
+
+      <div class="section-head"><h2>Backend service status</h2><span class="count">What this frontend expects to connect to</span></div>
+      <table class="status-table">
+        <tr><th>Service</th><th>Powers</th><th>Status</th></tr>
+        <tr><td>Authentication backend</td><td>Farmer login</td><td><span class="pill-planned">Planned</span></td></tr>
+        <tr><td>AI orchestration</td><td>Insights, recommendations, confidence &amp; evidence</td><td><span class="pill-planned">Planned</span></td></tr>
+        <tr><td>Sensor data ingestion</td><td>Sensor dashboard, device status, history</td><td><span class="pill-planned">Planned</span></td></tr>
+        <tr><td>Camera data integration</td><td>Camera dashboard, image analysis</td><td><span class="pill-planned">Planned</span></td></tr>
+        <tr><td>AI Assistant backend</td><td>Ask the Farm chat</td><td><span class="pill-planned">Planned</span></td></tr>
+        <tr><td>Farm Memory backend</td><td>Historical AI decisions, reports</td><td><span class="pill-planned">Planned</span></td></tr>
+        <tr><td>Weather &amp; historical data</td><td>Overview, Insights, Irrigation</td><td><span class="status-pill online"><span class="d"></span>live (Open-Meteo)</span></td></tr>
+      </table>
     </div>
 
   </div>
