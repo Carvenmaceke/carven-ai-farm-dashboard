@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carven & Vukona — Farm Intelligence Platform</title>
+<title>Project 5 — AI Agriculture Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -193,6 +193,24 @@
   .npk-row{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;color:var(--muted);}
   .npk-row strong{color:var(--ink);}
 
+  .chat-box{border:1px solid var(--line);background:var(--paper);padding:16px;}
+  .chat-log{display:flex;flex-direction:column;gap:12px;margin-bottom:14px;max-height:460px;overflow-y:auto;}
+  .chat-msg{max-width:78%;}
+  .chat-msg.user{align-self:flex-end;}
+  .chat-msg .bubble{padding:9px 13px;font-size:13.5px;}
+  .chat-msg.user .bubble{background:var(--ink);color:var(--field);}
+  .chat-msg.ai .bubble{background:#fff;border:1px solid var(--line);}
+  .chat-msg.ai .answer{font-weight:600;margin-bottom:8px;font-family:'Spectral',serif;font-size:15px;}
+  .chat-msg.ai .block{margin-top:8px;}
+  .chat-msg.ai .block .label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;margin-bottom:3px;}
+  .chat-msg.ai ul{margin:0;padding-left:18px;font-size:13px;}
+  .chat-msg.ai .rec{background:var(--ai-soft);color:#144c47;padding:7px 10px;font-size:13px;margin-top:2px;}
+  .chat-input-row{display:flex;gap:8px;}
+  .chat-input{flex:1;padding:9px 12px;border:1px solid var(--line);font-size:13.5px;font-family:inherit;background:#fff;}
+  .chat-suggestions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .chip{font-size:12px;padding:6px 11px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--ink);}
+  .chip:hover{background:var(--field-deep);}
+
   footer{padding:18px 30px 40px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);margin-top:20px;}
 
   @media (max-width:760px){
@@ -207,8 +225,8 @@
 
 <div class="topbar">
   <div class="brand">
-    <span class="mark">Carven + Vukona</span>
-    <span class="sub">Farm Intelligence Platform</span>
+    <span class="mark">Project 5</span>
+    <span class="sub">AI Agriculture Platform</span>
     <span class="farm">Highveld Vegetable Plots — Pretoria, Gauteng</span>
   </div>
   <div class="ai-health">
@@ -231,22 +249,26 @@
 
     <div class="rail-divider"></div>
     <h3>About this view</h3>
-    <p class="rail-note">AI Intelligence (Carven) covers insights, alerts &amp; recommendations. Physical Intelligence (Vukona) covers sensors, cameras &amp; automation. Weather/soil is live; sensor, camera and automation data are demo previews pending hardware.</p>
+    <p class="rail-note">AI Intelligence covers insights, alerts &amp; recommendations. Physical Intelligence covers sensors, cameras &amp; automation. AI Assistant lets you ask questions about the farm. Weather/soil is live; sensor, camera and automation data are demo previews pending hardware.</p>
   </div>
 
   <div class="main">
 
     <div class="tabs">
-      <span class="tab-group-label">AI Intelligence — Carven</span>
+      <span class="tab-group-label">AI Intelligence</span>
       <button class="tab active" data-tab="overview">Overview</button>
       <button class="tab" data-tab="insights">Insights</button>
       <button class="tab" data-tab="alerts">Alerts <span class="mono" id="alert-count" style="font-size:10.5px;"></span></button>
       <button class="tab" data-tab="harvest">Predicted Harvest</button>
-      <span class="tab-group-label">Physical Intelligence — Vukona</span>
+      <span class="tab-group-label">Physical Intelligence</span>
       <button class="tab" data-tab="sensors">Sensors</button>
       <button class="tab" data-tab="cameras">Cameras &amp; Plant Health</button>
       <button class="tab" data-tab="irrigation">Irrigation &amp; Nutrients</button>
       <button class="tab" data-tab="automation">Automation Centre</button>
+      <span class="tab-group-label">AI Assistant</span>
+      <button class="tab" data-tab="assistant">Ask the Farm</button>
+      <button class="tab" data-tab="memory">Farm Memory</button>
+      <button class="tab" data-tab="reports">Reports &amp; Analytics</button>
     </div>
 
     <!-- OVERVIEW -->
@@ -332,10 +354,44 @@
       <div class="log-list" id="log-list"></div>
     </div>
 
+    <!-- AI ASSISTANT -->
+    <div class="panel" id="panel-assistant">
+      <div class="data-note demo"><span class="flag">Demo logic</span><span>Answers below are generated from simple pattern-matching over the same demo data used elsewhere, standing in for a real AI backend. The response format — Answer, Evidence, Reason, Recommendation — is the intended final shape.</span></div>
+      <div class="section-head"><h2>Ask the farm a question</h2></div>
+      <div class="chat-box">
+        <div class="chat-log" id="chat-log"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-input" class="chat-input" placeholder="e.g. Why are my tomatoes stressed?" />
+          <button class="btn" id="chat-send">Ask</button>
+        </div>
+        <div class="chat-suggestions">
+          <button class="chip" data-q="Why are my tomatoes stressed?">Why are my tomatoes stressed?</button>
+          <button class="chip" data-q="Do I need to water today?">Do I need to water today?</button>
+          <button class="chip" data-q="What's the plant health status?">What's the plant health status?</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FARM MEMORY -->
+    <div class="panel" id="panel-memory">
+      <div class="data-note demo"><span class="flag">Demo data</span><span>Farm Memory will store every AI decision, its evidence and its outcome over time. Shown below is illustrative — no real decision history exists yet.</span></div>
+      <div class="section-head"><h2>Historical AI decisions</h2></div>
+      <div class="log-list" id="memory-list"></div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="panel" id="panel-reports">
+      <div class="data-note demo"><span class="flag">Demo data</span><span>Illustrative summary metrics — once Farm Memory holds real history, these become live analytics.</span></div>
+      <div class="section-head"><h2>Summary</h2></div>
+      <div class="zone-tiles" id="report-tiles"></div>
+      <div class="section-head"><h2>AI history</h2></div>
+      <div class="log-list" id="report-history"></div>
+    </div>
+
   </div>
 </div>
 
-<footer>Carven + Vukona Farm Intelligence Platform — weather and soil-model data are live (Open-Meteo). Sensor telemetry, camera detections, nutrient readings and hardware automation are demo previews pending physical installation. Always confirm bed conditions before acting on time-critical guidance.</footer>
+<footer>Project 5 — AI Agriculture Platform. Weather and soil-model data are live (Open-Meteo). Sensor telemetry, camera detections, nutrient readings, hardware automation and the AI Assistant are demo previews standing in for the real AI backend and sensor pipeline. Always confirm bed conditions before acting on time-critical guidance.</footer>
 
 <script>
 const PRETORIA_LAT = -25.7479;
@@ -499,7 +555,7 @@ const AUTOMATION_POLICIES = [
 let ACTION_LOG = [
   {t:'08:14', who:'Automation', text:'Valve — Spinach Bed drip line turned ON (policy: morning cycle)'},
   {t:'07:02', who:'Automation', text:'Skipped scheduled irrigation — rain forecast 68%'},
-  {t:'Yesterday', who:'Carven', text:'Marked "Irrigate River-adjacent bed" as done'}
+  {t:'Yesterday', who:'Farmer', text:'Marked "Irrigate River-adjacent bed" as done'}
 ];
 
 function confBars(n){ let bars=''; for(let i=1;i<=4;i++){ bars += `<span class="bar ${i<=n?'on':''}"></span>`; } const labels={1:'Low',2:'Moderate',3:'High',4:'Very high'}; return `<div class="confidence"><div class="bars">${bars}</div><span class="label">${labels[n]}</span></div>`; }
@@ -607,6 +663,105 @@ function renderAutomation(){
   });
 }
 
+// =====================================================================
+// AI ASSISTANT — demo pattern-matching over the same live/demo data.
+// Real version will call the AI backend's orchestration + Farm Memory.
+// =====================================================================
+const FARM_MEMORY = [
+  {t:'2 days ago', who:'AI', text:'Recommended irrigation for Tomato Block — moisture 9% below target. Farmer approved; pump ran 20 min.'},
+  {t:'4 days ago', who:'AI', text:'Flagged fungal-risk humidity in Cabbage Rows. Farmer reviewed, no action taken — humidity dropped naturally next day.'},
+  {t:'6 days ago', who:'AI', text:'Predicted harvest window for East bed shifted 3 days earlier based on growing-degree days.'},
+  {t:'1 week ago', who:'AI', text:'Detected possible pest activity in Cabbage Rows (mock camera preview) — flagged for scouting.'}
+];
+
+function answerFarmQuestion(q){
+  const ql = q.toLowerCase();
+  const zoneMatch = Object.entries(CROPS).find(([id,cfg]) => ql.includes(id) || ql.includes(cfg.crop.toLowerCase()));
+  const zoneId = zoneMatch ? zoneMatch[0] : 'tomato';
+  const cfg = CROPS[zoneId];
+  const s = fetchSensorData(zoneId);
+
+  if(!LIVE.ready){
+    return {answer:"Still loading live weather and soil data — try again in a moment.", evidence:[], reason:'', recommendation:''};
+  }
+
+  if(ql.includes('water') || ql.includes('irrigat')){
+    const deficit = cfg.moistureMin - s.moisturePct;
+    if(deficit > 3){
+      return {
+        answer:`Yes — ${cfg.name} is ${deficit.toFixed(1)} percentage points below its ${cfg.moistureMin}% moisture target.`,
+        evidence:[`Soil moisture: ${s.moisturePct.toFixed(1)}%`, `Target: ${cfg.moistureMin}%`, `Rain forecast (72h): ${LIVE.rain72}%`],
+        reason:`Low rain probability means the deficit won't correct itself soon.`,
+        recommendation:`Irrigate ${cfg.name} within the next day.`
+      };
+    }
+    return { answer:`Not urgently — ${cfg.name} is at ${s.moisturePct.toFixed(1)}%, above its ${cfg.moistureMin}% target.`, evidence:[`Soil moisture: ${s.moisturePct.toFixed(1)}%`, `Rain forecast (72h): ${LIVE.rain72}%`], reason:'Moisture is within the comfortable range for this crop.', recommendation:'No irrigation action needed today.' };
+  }
+
+  if(ql.includes('stress') || ql.includes('slow') || ql.includes('wrong') || ql.includes('health')){
+    const deficit = cfg.moistureMin - s.moisturePct; const heat = s.tempC - cfg.tempMax;
+    const causes = [];
+    if(deficit > 3) causes.push(`soil moisture running ${deficit.toFixed(1)} points below target`);
+    if(heat > 0) causes.push(`air temperature ${heat.toFixed(1)}°C above this crop's comfort ceiling`);
+    if(LIVE.humidity > cfg.humidityFungal) causes.push(`humidity above the fungal-risk threshold`);
+    return {
+      answer: causes.length ? `${cfg.name} shows early stress signals.` : `${cfg.name} looks within normal range right now.`,
+      evidence:[`Soil moisture: ${s.moisturePct.toFixed(1)}% (target ${cfg.moistureMin}%)`, `Air temperature: ${Math.round(LIVE.tempC)}°C (ceiling ${cfg.tempMax}°C)`, `Humidity: ${Math.round(LIVE.humidity)}% (fungal risk above ${cfg.humidityFungal}%)`],
+      reason: causes.length ? causes.join('; ') + '.' : 'All tracked conditions are within threshold.',
+      recommendation: causes.length ? 'Review the Insights tab for the matching recommendation card and evidence.' : 'No action needed.'
+    };
+  }
+
+  return {
+    answer:`Here's the current status for ${cfg.name}.`,
+    evidence:[`Soil moisture: ${s.moisturePct.toFixed(1)}%`, `Air temperature: ${Math.round(LIVE.tempC)}°C`, `Humidity: ${Math.round(LIVE.humidity)}%`],
+    reason:'General status check — no specific concern matched in your question.',
+    recommendation:'Ask about watering, stress, or plant health for a more specific answer.'
+  };
+}
+
+function pushChatMsg(role, content){
+  const log = document.getElementById('chat-log');
+  if(role === 'user'){
+    log.insertAdjacentHTML('beforeend', `<div class="chat-msg user"><div class="bubble">${content}</div></div>`);
+  }else{
+    const c = content;
+    log.insertAdjacentHTML('beforeend', `<div class="chat-msg ai"><div class="bubble">
+      <div class="answer">${c.answer}</div>
+      ${c.evidence.length ? `<div class="block"><div class="label">Evidence</div><ul>${c.evidence.map(e=>`<li>${e}</li>`).join('')}</ul></div>` : ''}
+      ${c.reason ? `<div class="block"><div class="label">Reason</div>${c.reason}</div>` : ''}
+      ${c.recommendation ? `<div class="block"><div class="label">Recommendation</div><div class="rec">${c.recommendation}</div></div>` : ''}
+    </div></div>`);
+  }
+  log.scrollTop = log.scrollHeight;
+}
+
+function askFarm(q){
+  if(!q.trim()) return;
+  pushChatMsg('user', q);
+  setTimeout(() => pushChatMsg('ai', answerFarmQuestion(q)), 250);
+}
+
+function initAssistant(){
+  document.getElementById('chat-send').onclick = () => {
+    const input = document.getElementById('chat-input');
+    askFarm(input.value); input.value = '';
+  };
+  document.getElementById('chat-input').addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){ const input = e.target; askFarm(input.value); input.value=''; }
+  });
+  document.querySelectorAll('.chip').forEach(chip => { chip.onclick = () => askFarm(chip.dataset.q); });
+
+  document.getElementById('memory-list').innerHTML = FARM_MEMORY.map(m => `<div class="log-row"><div class="t">${m.t}</div><div class="who">${m.who}</div><div>${m.text}</div></div>`).join('');
+
+  document.getElementById('report-tiles').innerHTML = `
+    <div class="zone-tile"><div class="top"><span class="name">Recommendations (7d)</span></div><div class="metric"><strong>12</strong> generated</div></div>
+    <div class="zone-tile"><div class="top"><span class="name">Approved by farmer</span></div><div class="metric"><strong>9</strong> of 12</div></div>
+    <div class="zone-tile"><div class="top"><span class="name">Alerts raised</span></div><div class="metric"><strong>3</strong> this week</div></div>
+    <div class="zone-tile"><div class="top"><span class="name">Avg. confidence</span></div><div class="metric"><strong>High</strong></div></div>`;
+  document.getElementById('report-history').innerHTML = FARM_MEMORY.map(m => `<div class="log-row"><div class="t">${m.t}</div><div class="who">${m.who}</div><div>${m.text}</div></div>`).join('');
+}
+
 function wireZoneFilter(){
   document.querySelectorAll('.zone-item').forEach(btn => {
     btn.onclick = () => {
@@ -628,6 +783,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 });
 
 fetchWeather();
+initAssistant();
 setInterval(fetchWeather, 10*60*1000);
 </script>
 
