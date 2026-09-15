@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project 5 — AI Agriculture Platform</title>
+<title>AI Agriculture — Farm Intelligence Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -61,6 +61,26 @@
   .zone-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 8px;background:none;border:none;border-radius:2px;cursor:pointer;color:#dbe3cd;font-size:13.5px;transition:background 0.14s ease;}
   .zone-item:hover{background:rgba(255,255,255,0.06);}
   .zone-item.active{background:rgba(214,143,44,0.16);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--gold);}
+  .zone-item.all-item{margin-bottom:10px;}
+
+  .bed-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .bed-grid .zone-item{
+    position:relative;flex-direction:column;align-items:flex-start;gap:0;
+    background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08);
+    border-radius:8px;padding:10px 10px 9px;box-shadow:none;
+  }
+  .bed-grid .zone-item:hover{background:rgba(255,255,255,0.075);border-color:rgba(255,255,255,0.16);}
+  .bed-grid .zone-item.active{background:rgba(214,143,44,0.2);border-color:var(--gold);box-shadow:none;color:#dbe3cd;}
+  .bed-grid .zone-icon{
+    width:30px;height:30px;border-radius:7px;margin-bottom:8px;
+    background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;color:#c7d4b7;
+  }
+  .bed-grid .zone-icon svg{width:16px;height:16px;}
+  .bed-grid .zone-item.active .zone-icon{background:rgba(255,255,255,0.16);color:#fff;}
+  .bed-grid .zone-status{position:absolute;top:9px;right:9px;box-shadow:0 0 0 2px rgba(20,26,20,0.55);}
+  .bed-grid .zone-name{font-size:12px;font-weight:600;display:block;line-height:1.25;}
+  .bed-grid .zone-crop{font-size:10px;color:#8b9a7d;display:block;margin-top:1px;}
+  .bed-grid .zone-item.active .zone-name{font-weight:700;color:#fff;}
   .zone-status{width:9px;height:9px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 2px rgba(255,255,255,0.12);}
   .zone-status.ok{background:var(--ok);}
   .zone-status.watch{background:var(--gold);}
@@ -315,8 +335,8 @@
 
 <div class="topbar">
   <div class="brand">
-    <span class="mark">Project 5</span>
-    <span class="sub">AI Agriculture Platform</span>
+    <span class="mark">AI Agriculture</span>
+    <span class="sub">Farm Intelligence Platform</span>
     <span class="farm">Highveld Vegetable Plots — Pretoria, Gauteng</span>
   </div>
   <div class="ai-health">
@@ -330,12 +350,34 @@
 
   <div class="rail">
     <h3>Beds</h3>
-    <button class="zone-item active" data-zone="all"><span class="zone-status ok"></span><span class="zone-name">All beds</span></button>
-    <button class="zone-item" data-zone="tomato"><span class="zone-status ok" id="dot-tomato"></span><span class="zone-name">Tomato Block<br><span class="zone-crop">Tomatoes</span></span></button>
-    <button class="zone-item" data-zone="spinach"><span class="zone-status ok" id="dot-spinach"></span><span class="zone-name">Spinach Bed<br><span class="zone-crop">Spinach</span></span></button>
-    <button class="zone-item" data-zone="pepper"><span class="zone-status ok" id="dot-pepper"></span><span class="zone-name">Pepper Tunnel<br><span class="zone-crop">Peppers</span></span></button>
-    <button class="zone-item" data-zone="cabbage"><span class="zone-status ok" id="dot-cabbage"></span><span class="zone-name">Cabbage Rows<br><span class="zone-crop">Cabbage</span></span></button>
-    <button class="zone-item" data-zone="carrot"><span class="zone-status ok" id="dot-carrot"></span><span class="zone-name">Carrot Bed<br><span class="zone-crop">Carrots</span></span></button>
+    <button class="zone-item all-item active" data-zone="all"><span class="zone-status ok"></span><span class="zone-name">All beds</span></button>
+    <div class="bed-grid">
+      <button class="zone-item" data-zone="tomato">
+        <span class="zone-status ok" id="dot-tomato"></span>
+        <span class="zone-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5c.5-1 1.7-1.8 2-1.8s1.5.8 2 1.8"/><circle cx="12" cy="14" r="7"/><path d="M9 10c1-1 4-1 5 0"/></svg></span>
+        <span class="zone-name">Tomato Block</span><span class="zone-crop">Tomatoes</span>
+      </button>
+      <button class="zone-item" data-zone="spinach">
+        <span class="zone-status ok" id="dot-spinach"></span>
+        <span class="zone-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-5-2-7-7-6-13 6-1 11 1 13 6-3 6-7 7-7 7z"/><path d="M8 10c3 2 5 5 4 10"/></svg></span>
+        <span class="zone-name">Spinach Bed</span><span class="zone-crop">Spinach</span>
+      </button>
+      <button class="zone-item" data-zone="pepper">
+        <span class="zone-status ok" id="dot-pepper"></span>
+        <span class="zone-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4c1 0 1.5 1 1.5 2"/><path d="M10 6c4 0 7 3 6 7-1 5-5 8-8 6-3-2-3-7-1-11 .8-1.5 2-2 3-2z"/></svg></span>
+        <span class="zone-name">Pepper Tunnel</span><span class="zone-crop">Peppers</span>
+      </button>
+      <button class="zone-item" data-zone="cabbage">
+        <span class="zone-status ok" id="dot-cabbage"></span>
+        <span class="zone-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><path d="M12 8v-2M12 20v-2M8 12H6M18 12h-2"/></svg></span>
+        <span class="zone-name">Cabbage Rows</span><span class="zone-crop">Cabbage</span>
+      </button>
+      <button class="zone-item" data-zone="carrot">
+        <span class="zone-status ok" id="dot-carrot"></span>
+        <span class="zone-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v3M9 4.5l1.5 3M15 4.5L13.5 7.5"/><path d="M12 8c3 0 4 3 3 6-1 3.5-2.5 6-3 6s-2-2.5-3-6c-1-3 0-6 3-6z"/></svg></span>
+        <span class="zone-name">Carrot Bed</span><span class="zone-crop">Carrots</span>
+      </button>
+    </div>
 
     <div class="rail-divider"></div>
     <h3>About this view</h3>
@@ -577,7 +619,7 @@
   </div>
 </div>
 
-<footer>Project 5 — AI Agriculture Platform. Weather and soil-model data are live (Open-Meteo). Sensor telemetry, camera detections, nutrient readings, hardware automation and the AI Assistant are demo previews standing in for the real AI backend and sensor pipeline. Always confirm bed conditions before acting on time-critical guidance.</footer>
+<footer>AI Agriculture — Farm Intelligence Platform. Weather and soil-model data are live (Open-Meteo). Sensor telemetry, camera detections, nutrient readings, hardware automation and the AI Assistant are demo previews standing in for the real AI backend and sensor pipeline. Always confirm bed conditions before acting on time-critical guidance.</footer>
 
 <script>
 const PRETORIA_LAT = -25.7479;
