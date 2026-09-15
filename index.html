@@ -72,31 +72,24 @@
 
   /* ---------- main / nav ---------- */
   .main{padding:26px 32px 60px;}
-  .tab-groups{display:flex;flex-direction:column;gap:9px;margin-bottom:26px;}
-  .tab-group{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-  .tab-group-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;width:122px;flex-shrink:0;font-weight:700;}
-  .group-badge{
-    display:inline-flex;align-items:center;gap:7px;flex-shrink:0;
-    padding:6px 13px 6px 10px;border-radius:14px;
-    font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;
-    box-shadow:0 1px 2px rgba(20,32,26,0.08);
-  }
-  .group-badge svg{width:14px;height:14px;flex-shrink:0;}
-  .group-badge.g-ai{background:var(--teal-soft);color:#0c4a41;}
-  .group-badge.g-physical{background:#f2e2bc;color:var(--gold-deep);}
-  .group-badge.g-assistant{background:#ece0f2;color:#5c3d78;}
-  .group-badge.g-system{background:#e2e2da;color:#3d3d34;}
-  .tab-row.g-ai{border-color:var(--teal);border-left:3px solid var(--teal);}
-  .tab-row.g-physical{border-color:var(--gold-deep);border-left:3px solid var(--gold-deep);}
-  .tab-row.g-assistant{border-color:#8a5fae;border-left:3px solid #8a5fae;}
-  .tab-row.g-system{border-color:#6b6b5e;border-left:3px solid #6b6b5e;}
-  .tab-row{display:flex;gap:3px;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);padding:4px;border-radius:22px;overflow-x:auto;box-shadow:inset 0 1px 2px rgba(20,32,26,0.05);}
-  .tab{display:flex;align-items:center;gap:6px;padding:7px 14px 7px 12px;border-radius:18px;border:none;background:transparent;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background 0.16s ease, color 0.16s ease, transform 0.12s ease;}
+  .tab-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-bottom:26px;align-items:start;}
+  .tab-group{--accent:var(--teal);border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--paper);padding:14px 16px 13px;box-shadow:var(--shadow);}
+  .tab-group.g-ai{--accent:var(--teal);}
+  .tab-group.g-physical{--accent:var(--gold-deep);}
+  .tab-group.g-assistant{--accent:#8a5fae;}
+  .tab-group.g-system{--accent:#6b6b5e;}
+  .tab-group-head{display:flex;align-items:flex-start;gap:11px;margin-bottom:12px;}
+  .tab-group-icon{width:32px;height:32px;border-radius:7px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .tab-group-icon svg{width:17px;height:17px;}
+  .tab-group-title{font-family:'Spectral',serif;font-weight:700;font-size:15px;line-height:1.2;}
+  .tab-group-sub{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+  .tab-row{display:flex;gap:6px;flex-wrap:wrap;}
+  .tab{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:14px;border:1px solid var(--line);background:var(--field);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background 0.16s ease, color 0.16s ease, transform 0.12s ease, border-color 0.16s ease;}
   .tab svg{width:14px;height:14px;flex-shrink:0;opacity:0.7;transition:opacity 0.16s ease;}
   .tab:hover{background:var(--field-deep);color:var(--ink);transform:translateY(-1px);}
   .tab:hover svg{opacity:1;}
   .tab:active{transform:translateY(0);}
-  .tab.active{background:var(--gold-deep);color:#fff;font-weight:700;box-shadow:0 2px 7px rgba(163,101,26,0.35);}
+  .tab.active{background:var(--accent);color:#fff;font-weight:700;border-color:var(--accent);box-shadow:0 2px 7px rgba(20,32,26,0.22);}
   .tab.active svg{opacity:1;}
   .tab .count-badge{font-size:9.5px;font-weight:700;background:rgba(0,0,0,0.14);padding:1px 6px;border-radius:8px;}
   .tab.active .count-badge{background:rgba(255,255,255,0.25);}
@@ -292,9 +285,7 @@
     .rail{display:none;}
     .main{padding:18px 14px 50px;}
     .weather-widget{grid-template-columns:1fr;}
-    .tab-group{flex-direction:column;align-items:flex-start;gap:6px;}
-    .tab-group-label{width:auto;}
-    .group-badge{width:fit-content;}
+    .tab-groups{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -332,35 +323,47 @@
   <div class="main">
 
     <div class="tab-groups">
-      <div class="tab-group">
-        <span class="group-badge g-ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.4.3.5.8.5 1.3V16h6v-.8c0-.5.1-1 .5-1.3A6 6 0 0012 3z"/></svg>AI Intelligence</span>
-        <div class="tab-row g-ai">
+      <div class="tab-group g-ai">
+        <div class="tab-group-head">
+          <div class="tab-group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.4.3.5.8.5 1.3V16h6v-.8c0-.5.1-1 .5-1.3A6 6 0 0012 3z"/></svg></div>
+          <div><div class="tab-group-title">AI Intelligence</div><div class="tab-group-sub">Insights, alerts &amp; recommendations from the AI engine</div></div>
+        </div>
+        <div class="tab-row">
           <button class="tab active" data-tab="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>Overview</button>
           <button class="tab" data-tab="insights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.4.3.5.8.5 1.3V16h6v-.8c0-.5.1-1 .5-1.3A6 6 0 0012 3z"/></svg>Insights</button>
           <button class="tab" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>Alerts<span class="count-badge" id="alert-count"></span></button>
           <button class="tab" data-tab="harvest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Predicted Harvest</button>
         </div>
       </div>
-      <div class="tab-group">
-        <span class="group-badge g-physical"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="8" width="8" height="8" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg>Physical Intelligence</span>
-        <div class="tab-row g-physical">
+      <div class="tab-group g-physical">
+        <div class="tab-group-head">
+          <div class="tab-group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="8" width="8" height="8" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg></div>
+          <div><div class="tab-group-title">Physical Intelligence</div><div class="tab-group-sub">Sensors, cameras &amp; automation on the ground</div></div>
+        </div>
+        <div class="tab-row">
           <button class="tab" data-tab="sensors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 0116 0M7.5 12a4.5 4.5 0 019 0"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>Sensors</button>
           <button class="tab" data-tab="cameras"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg>Cameras &amp; Plant Health</button>
           <button class="tab" data-tab="irrigation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z"/></svg>Irrigation &amp; Nutrients</button>
           <button class="tab" data-tab="automation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h4M4 12h10M4 17h6"/><circle cx="10" cy="7" r="1.6" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="17" r="1.6" fill="currentColor" stroke="none"/></svg>Automation Centre</button>
         </div>
       </div>
-      <div class="tab-group">
-        <span class="group-badge g-assistant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg>AI Assistant</span>
-        <div class="tab-row g-assistant">
+      <div class="tab-group g-assistant">
+        <div class="tab-group-head">
+          <div class="tab-group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg></div>
+          <div><div class="tab-group-title">AI Assistant</div><div class="tab-group-sub">Ask questions, review past decisions &amp; reports</div></div>
+        </div>
+        <div class="tab-row">
           <button class="tab" data-tab="assistant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg>Ask the Farm</button>
           <button class="tab" data-tab="memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9l5 5v11H5z"/><path d="M14 4v5h5M9 13h6M9 16h6"/></svg>Farm Memory</button>
           <button class="tab" data-tab="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>Reports &amp; Analytics</button>
         </div>
       </div>
-      <div class="tab-group">
-        <span class="group-badge g-system"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M6.8 7.6L11 16.2M17.2 7.6L13 16.2"/></svg>System</span>
-        <div class="tab-row g-system">
+      <div class="tab-group g-system">
+        <div class="tab-group-head">
+          <div class="tab-group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M6.8 7.6L11 16.2M17.2 7.6L13 16.2"/></svg></div>
+          <div><div class="tab-group-title">System</div><div class="tab-group-sub">How this frontend connects to the backend</div></div>
+        </div>
+        <div class="tab-row">
           <button class="tab" data-tab="architecture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M6.8 7.6L11 16.2M17.2 7.6L13 16.2"/></svg>Architecture</button>
         </div>
       </div>
