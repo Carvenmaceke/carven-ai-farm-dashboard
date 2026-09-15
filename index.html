@@ -72,7 +72,29 @@
 
   /* ---------- main / nav ---------- */
   .main{padding:26px 32px 60px;}
-  .tab-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-bottom:26px;align-items:start;}
+  .area-switcher{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px;}
+  .area-btn{
+    display:flex;align-items:center;gap:11px;text-align:left;
+    border:1.5px solid var(--line);background:var(--paper);padding:12px 14px;cursor:pointer;
+    transition:border-color 0.15s ease, background 0.15s ease, transform 0.12s ease;
+  }
+  .area-btn:hover{transform:translateY(-1px);}
+  .area-icon{width:32px;height:32px;border-radius:7px;background:var(--line-soft);color:var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s ease, color 0.15s ease;}
+  .area-icon svg{width:17px;height:17px;}
+  .area-title{font-family:'Spectral',serif;font-weight:700;font-size:13.5px;color:var(--ink);line-height:1.2;}
+  .area-sub{font-size:10.5px;color:var(--muted);margin-top:2px;}
+  .area-btn.g-ai.active{border-color:var(--teal);background:var(--teal-soft);}
+  .area-btn.g-ai.active .area-icon{background:var(--teal);color:#fff;}
+  .area-btn.g-physical.active{border-color:var(--gold-deep);background:#f2e2bc;}
+  .area-btn.g-physical.active .area-icon{background:var(--gold-deep);color:#fff;}
+  .area-btn.g-assistant.active{border-color:#8a5fae;background:#ece0f2;}
+  .area-btn.g-assistant.active .area-icon{background:#8a5fae;color:#fff;}
+  .area-btn.g-system.active{border-color:#6b6b5e;background:#e2e2da;}
+  .area-btn.g-system.active .area-icon{background:#6b6b5e;color:#fff;}
+
+  .tab-groups{display:block;margin-bottom:26px;}
+  .tab-groups .tab-group{display:none;}
+  .tab-groups .tab-group.active-area{display:block;}
   .tab-group{--accent:var(--teal);border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--paper);padding:14px 16px 13px;box-shadow:var(--shadow);}
   .tab-group.g-ai{--accent:var(--teal);}
   .tab-group.g-physical{--accent:var(--gold-deep);}
@@ -322,8 +344,27 @@
 
   <div class="main">
 
+    <div class="area-switcher">
+      <button class="area-btn active g-ai" data-area="ai">
+        <div class="area-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.4.3.5.8.5 1.3V16h6v-.8c0-.5.1-1 .5-1.3A6 6 0 0012 3z"/></svg></div>
+        <div><div class="area-title">AI Intelligence</div><div class="area-sub">Insights, alerts &amp; recommendations</div></div>
+      </button>
+      <button class="area-btn g-physical" data-area="physical">
+        <div class="area-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="8" width="8" height="8" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg></div>
+        <div><div class="area-title">Physical Intelligence</div><div class="area-sub">Sensors, cameras &amp; automation</div></div>
+      </button>
+      <button class="area-btn g-assistant" data-area="assistant">
+        <div class="area-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg></div>
+        <div><div class="area-title">AI Assistant</div><div class="area-sub">Ask, review &amp; report</div></div>
+      </button>
+      <button class="area-btn g-system" data-area="system">
+        <div class="area-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M6.8 7.6L11 16.2M17.2 7.6L13 16.2"/></svg></div>
+        <div><div class="area-title">System</div><div class="area-sub">Backend connections</div></div>
+      </button>
+    </div>
+
     <div class="tab-groups">
-      <div class="tab-group g-ai">
+      <div class="tab-group g-ai active-area" data-area="ai">
         <div class="tab-group-head">
           <div class="tab-group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.4.3.5.8.5 1.3V16h6v-.8c0-.5.1-1 .5-1.3A6 6 0 0012 3z"/></svg></div>
           <div><div class="tab-group-title">AI Intelligence</div><div class="tab-group-sub">Insights, alerts &amp; recommendations from the AI engine</div></div>
@@ -335,7 +376,7 @@
           <button class="tab" data-tab="harvest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Predicted Harvest</button>
         </div>
       </div>
-      <div class="tab-group g-physical">
+      <div class="tab-group g-physical" data-area="physical">
         <div class="tab-group-head">
           <div class="tab-group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="8" width="8" height="8" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg></div>
           <div><div class="tab-group-title">Physical Intelligence</div><div class="tab-group-sub">Sensors, cameras &amp; automation on the ground</div></div>
@@ -347,7 +388,7 @@
           <button class="tab" data-tab="automation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h4M4 12h10M4 17h6"/><circle cx="10" cy="7" r="1.6" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="17" r="1.6" fill="currentColor" stroke="none"/></svg>Automation Centre</button>
         </div>
       </div>
-      <div class="tab-group g-assistant">
+      <div class="tab-group g-assistant" data-area="assistant">
         <div class="tab-group-head">
           <div class="tab-group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg></div>
           <div><div class="tab-group-title">AI Assistant</div><div class="tab-group-sub">Ask questions, review past decisions &amp; reports</div></div>
@@ -358,7 +399,7 @@
           <button class="tab" data-tab="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>Reports &amp; Analytics</button>
         </div>
       </div>
-      <div class="tab-group g-system">
+      <div class="tab-group g-system" data-area="system">
         <div class="tab-group-head">
           <div class="tab-group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M6.8 7.6L11 16.2M17.2 7.6L13 16.2"/></svg></div>
           <div><div class="tab-group-title">System</div><div class="tab-group-sub">How this frontend connects to the backend</div></div>
@@ -929,6 +970,21 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+document.querySelectorAll('.area-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const area = btn.dataset.area;
+    document.querySelectorAll('.area-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-groups .tab-group').forEach(g=>g.classList.remove('active-area'));
+    const group = document.querySelector('.tab-groups .tab-group[data-area="'+area+'"]');
+    if(group){
+      group.classList.add('active-area');
+      const firstTab = group.querySelector('.tab');
+      if(firstTab) firstTab.click();
+    }
   });
 });
 
