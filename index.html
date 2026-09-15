@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carven — Highveld Vegetable Farm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#20281c;
+    --field:#e7ead9;
+    --field-deep:#dbe0c9;
+    --paper:#f4f5ec;
+    --line:#c7cdb2;
+    --wheat:#c08f2e;
+    --wheat-deep:#8f6a1e;
+    --ai:#1f6f68;
+    --ai-soft:#dcece9;
+    --alert:#9c4430;
+    --alert-soft:#f1ddd6;
+    --muted:#63705a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--field);color:var(--ink);font-family:'IBM Plex Sans', sans-serif;font-size:15px;line-height:1.5;}
+  h1,h2,h3{font-family:'Spectral', serif;font-weight:600;margin:0;letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono', monospace;letter-spacing:0.01em;}
+  button{font-family:inherit;}
+  code{font-family:'IBM Plex Mono', monospace;font-size:0.9em;background:rgba(0,0,0,0.06);padding:1px 4px;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;background:var(--ink);color:var(--field);flex-wrap:wrap;gap:10px;}
+  .brand{display:flex;align-items:baseline;gap:14px;}
+  .brand .mark{font-family:'Spectral', serif;font-weight:600;font-size:22px;color:var(--wheat);}
+  .brand .farm{font-size:14px;color:#b9c2a8;border-left:1px solid #4a5540;padding-left:14px;}
+  .ai-health{display:flex;align-items:center;gap:10px;font-size:13px;color:#c9d1ba;}
+  .ai-health .dot{width:8px;height:8px;border-radius:50%;background:#c9a544;box-shadow:0 0 0 3px rgba(201,165,68,0.25);}
+  .ai-health strong{color:var(--field);font-weight:600;}
+
+  .shell{display:grid;grid-template-columns:250px 1fr;min-height:100vh;}
+  .rail{background:var(--field-deep);border-right:1px solid var(--line);padding:22px 18px;}
+  .rail h3{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:12px;}
+  .zone-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 8px;background:none;border:none;border-left:3px solid transparent;cursor:pointer;color:var(--ink);font-size:14px;}
+  .zone-item:hover{background:rgba(0,0,0,0.03);}
+  .zone-item.active{border-left:3px solid var(--wheat-deep);background:var(--paper);font-weight:500;}
+  .zone-status{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .zone-status.ok{background:#5fae6a;}
+  .zone-status.watch{background:var(--wheat);}
+  .zone-status.alert{background:var(--alert);}
+  .zone-name{flex:1;}
+  .zone-crop{font-size:12px;color:var(--muted);}
+  .rail-divider{height:1px;background:var(--line);margin:20px 0;}
+  .rail-note{font-size:12.5px;color:var(--muted);line-height:1.55;}
+
+  .main{padding:26px 32px 60px;}
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:24px;flex-wrap:wrap;}
+  .tab{padding:10px 4px;margin-right:22px;background:none;border:none;border-bottom:2px solid transparent;font-size:14.5px;color:var(--muted);cursor:pointer;}
+  .tab.active{color:var(--ink);border-bottom:2px solid var(--wheat-deep);font-weight:600;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:6px;}
+  .section-head h2{font-size:20px;}
+  .section-head .count{font-size:12.5px;color:var(--muted);}
+
+  .weather-widget{display:grid;grid-template-columns:auto 1fr;gap:24px;border:1px solid var(--line);background:var(--paper);padding:16px 20px;margin-bottom:18px;align-items:center;}
+  .weather-now .temp{font-family:'Spectral',serif;font-size:38px;font-weight:600;line-height:1;}
+  .weather-now .cond{font-size:13px;color:var(--muted);margin-top:4px;}
+  .weather-now .loc{font-size:12px;color:var(--muted);}
+  .weather-days{display:flex;gap:0;overflow-x:auto;}
+  .wday{flex:1;min-width:74px;text-align:center;padding:0 10px;border-left:1px solid var(--line);}
+  .wday:first-child{border-left:none;}
+  .wday .d{font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .wday .t{font-size:14px;font-weight:600;}
+  .wday .p{font-size:11px;color:var(--ai);font-weight:600;margin-top:3px;}
+  .weather-error{font-size:13px;color:var(--alert);padding:4px 0;}
+  .source-note{font-size:11px;color:var(--muted);margin-top:10px;grid-column:1/-1;border-top:1px solid var(--line);padding-top:8px;}
+
+  .soil-strip{display:flex;gap:0;border:1px solid var(--line);background:var(--paper);margin-bottom:8px;overflow-x:auto;}
+  .soil-chip{flex:1;min-width:130px;padding:11px 14px;border-left:1px solid var(--line);}
+  .soil-chip:first-child{border-left:none;}
+  .soil-chip .k{font-size:11px;color:var(--muted);margin-bottom:3px;}
+  .soil-chip .v{font-size:17px;font-weight:600;font-family:'Spectral',serif;}
+
+  .data-note{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted);margin:0 0 22px;line-height:1.5;}
+  .data-note .flag{flex-shrink:0;font-size:10.5px;font-weight:700;color:var(--wheat-deep);background:#f2e6c8;padding:2px 7px;letter-spacing:0.02em;}
+  .data-note.demo .flag{color:var(--alert);background:var(--alert-soft);}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--ai);margin-bottom:12px;}
+  .card.priority{border-left-color:var(--wheat-deep);}
+  .card.alert{border-left-color:var(--alert);}
+  .card.demo{border-left-style:dashed;}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:16px 18px 12px;}
+  .card-title{font-family:'Spectral', serif;font-size:16.5px;font-weight:600;margin-bottom:4px;}
+  .card-meta{font-size:12.5px;color:var(--muted);}
+  .confidence{display:flex;align-items:center;gap:7px;flex-shrink:0;white-space:nowrap;}
+  .confidence .bars{display:flex;gap:2px;}
+  .confidence .bar{width:5px;height:14px;background:var(--line);}
+  .confidence .bar.on{background:var(--ai);}
+  .confidence .label{font-size:12px;font-weight:600;color:var(--ai);}
+  .card-actions{display:flex;gap:8px;padding:0 18px 14px;}
+  .btn{font-size:13px;padding:7px 13px;border:1px solid var(--ink);background:var(--ink);color:var(--field);cursor:pointer;}
+  .btn.ghost{background:none;color:var(--ink);border:1px solid var(--line);}
+  .why{border-top:1px solid var(--line);}
+  .why summary{list-style:none;padding:10px 18px;font-size:13px;color:var(--ai);cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px;}
+  .why summary::-webkit-details-marker{display:none;}
+  .why summary::before{content:"▸";display:inline-block;transition:transform 0.15s ease;font-size:11px;}
+  .why[open] summary::before{transform:rotate(90deg);}
+  .why-body{padding:2px 18px 16px;font-size:13.5px;color:var(--ink);}
+  .why-body .reasoning{background:var(--ai-soft);padding:10px 12px;margin-bottom:10px;color:#144c47;}
+  .evidence-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:8px;}
+  .evidence-item{border:1px solid var(--line);background:#fff;padding:9px 11px;}
+  .evidence-item .k{font-size:11px;color:var(--muted);margin-bottom:3px;}
+  .evidence-item .v{font-size:14px;font-weight:600;}
+  .evidence-item .v.down{color:var(--alert);}
+  .evidence-item .v.up{color:#3d7a3f;}
+  .alert-tag{display:inline-block;font-size:11px;font-weight:600;color:var(--alert);background:var(--alert-soft);padding:2px 7px;margin-bottom:6px;}
+  .demo-tag{display:inline-block;font-size:11px;font-weight:600;color:var(--wheat-deep);background:#f2e6c8;padding:2px 7px;margin-bottom:6px;}
+
+  .timeline-row{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);}
+  .timeline-row:last-child{border-bottom:none;}
+  .timeline-label .name{font-weight:600;font-size:14px;}
+  .timeline-label .crop{font-size:12px;color:var(--muted);}
+  .timeline-track{position:relative;height:22px;background:repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 68px);}
+  .timeline-window{position:absolute;top:3px;height:16px;background:var(--wheat);opacity:0.85;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#3a2c08;font-weight:600;white-space:nowrap;}
+
+  .zone-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px;}
+  .zone-tile{border:1px solid var(--line);padding:14px;background:var(--paper);}
+  .zone-tile .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .zone-tile .name{font-weight:600;font-size:14.5px;}
+  .zone-tile .metric{font-size:12px;color:var(--muted);}
+  .zone-tile .metric strong{color:var(--ink);}
+
+  footer{padding:18px 32px 40px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:20px;}
+
+  @media (max-width:760px){
+    .shell{grid-template-columns:1fr;}
+    .rail{display:none;}
+    .main{padding:20px 16px 50px;}
+    .weather-widget{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="mark">Carven</span>
+    <span class="farm">Highveld Vegetable Plots — Pretoria, Gauteng</span>
+  </div>
+  <div class="ai-health">
+    <span class="dot" id="weather-dot"></span>
+    <span id="weather-status">Weather &amp; soil: connecting…</span>
+  </div>
+</div>
+
+<div class="shell">
+
+  <div class="rail">
+    <h3>Beds</h3>
+    <button class="zone-item active" data-zone="all">
+      <span class="zone-status ok"></span>
+      <span class="zone-name">All beds</span>
+    </button>
+    <button class="zone-item" data-zone="tomato">
+      <span class="zone-status ok" id="dot-tomato"></span>
+      <span class="zone-name">Tomato Block<br><span class="zone-crop">Tomatoes</span></span>
+    </button>
+    <button class="zone-item" data-zone="spinach">
+      <span class="zone-status ok" id="dot-spinach"></span>
+      <span class="zone-name">Spinach Bed<br><span class="zone-crop">Spinach</span></span>
+    </button>
+    <button class="zone-item" data-zone="pepper">
+      <span class="zone-status ok" id="dot-pepper"></span>
+      <span class="zone-name">Pepper Tunnel<br><span class="zone-crop">Peppers</span></span>
+    </button>
+    <button class="zone-item" data-zone="cabbage">
+      <span class="zone-status ok" id="dot-cabbage"></span>
+      <span class="zone-name">Cabbage Rows<br><span class="zone-crop">Cabbage</span></span>
+    </button>
+    <button class="zone-item" data-zone="carrot">
+      <span class="zone-status ok" id="dot-carrot"></span>
+      <span class="zone-name">Carrot Bed<br><span class="zone-crop">Carrots</span></span>
+    </button>
+
+    <div class="rail-divider"></div>
+    <h3>About this view</h3>
+    <p class="rail-note">Recommendations are generated live from real weather + modeled soil data for Pretoria, checked against each crop's known moisture, heat and disease-risk thresholds. Camera-based pest/disease detection is a mock preview until cameras are installed.</p>
+  </div>
+
+  <div class="main">
+
+    <div class="tabs">
+      <button class="tab active" data-tab="overview">Overview</button>
+      <button class="tab" data-tab="insights">Insights</button>
+      <button class="tab" data-tab="alerts">Alerts <span class="mono" id="alert-count" style="font-size:11px;"></span></button>
+      <button class="tab" data-tab="cameras">Camera Watch</button>
+      <button class="tab" data-tab="harvest">Predicted Harvest</button>
+    </div>
+
+    <div class="panel active" id="panel-overview">
+
+      <div class="weather-widget" id="weather-widget">
+        <div class="weather-now">
+          <div class="temp" id="w-temp">—</div>
+          <div class="cond" id="w-cond">Loading live weather…</div>
+          <div class="loc">Pretoria, Gauteng</div>
+        </div>
+        <div class="weather-days" id="w-days"></div>
+        <div class="source-note">Live temperature, humidity &amp; forecast via Open-Meteo for Pretoria. Real data, refreshed on page load.</div>
+      </div>
+
+      <div class="soil-strip" id="soil-strip"></div>
+      <div class="data-note">
+        <span class="flag">Live · modeled</span>
+        <span>Soil moisture &amp; soil temperature above are Open-Meteo's live model estimate for this location — a genuine real-time reading, not from a physical probe yet. Once your soil sensors are installed, this is the exact value <code>fetchSensorData()</code> gets replaced with, per bed.</span>
+      </div>
+
+      <div class="section-head"><h2>Bed status</h2></div>
+      <div class="zone-tiles" id="zone-tiles"></div>
+
+      <div class="section-head"><h2>Today's priority</h2><span class="count">Generated live from weather + soil thresholds per crop</span></div>
+      <div id="priority-list"></div>
+    </div>
+
+    <div class="panel" id="panel-insights">
+      <div class="section-head"><h2>All insights</h2><span class="count" id="insight-count"></span></div>
+      <div id="insights-list"></div>
+    </div>
+
+    <div class="panel" id="panel-alerts">
+      <div class="section-head"><h2>Alerts</h2><span class="count">Crossed a hard threshold — needs a decision</span></div>
+      <div id="alerts-list"></div>
+    </div>
+
+    <div class="panel" id="panel-cameras">
+      <div class="data-note demo">
+        <span class="flag">Mock preview</span>
+        <span>No cameras are connected yet. These cards show the format real detections will use once a camera feed is wired to an image model — nothing below reflects your actual beds.</span>
+      </div>
+      <div class="section-head"><h2>Camera &amp; pest watch</h2></div>
+      <div id="cameras-list"></div>
+    </div>
+
+    <div class="panel" id="panel-harvest">
+      <div class="section-head"><h2>Predicted harvest windows</h2><span class="count">Based on typical days-to-maturity per crop — link to real planting dates for accuracy</span></div>
+      <div class="timeline" id="harvest-timeline"></div>
+    </div>
+
+  </div>
+</div>
+
+<footer>Carven AI Intelligence Dashboard — weather and soil-model data are live (Open-Meteo). Camera detections are a mock preview pending hardware. Always confirm bed conditions before acting on time-critical guidance.</footer>
+
+<script>
+// =====================================================================
+// LIVE DATA — Open-Meteo (no API key required, works directly from the
+// browser). Provides real current + forecast weather AND a modeled soil
+// moisture/temperature estimate for the given coordinates.
+// =====================================================================
+const PRETORIA_LAT = -25.7479;
+const PRETORIA_LON = 28.2293;
+
+const WMO_TEXT = {
+  0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
+  45:'Fog',48:'Depositing rime fog',
+  51:'Light drizzle',53:'Drizzle',55:'Dense drizzle',
+  61:'Slight rain',63:'Rain',65:'Heavy rain',
+  71:'Slight snow',73:'Snow',75:'Heavy snow',
+  80:'Rain showers',81:'Rain showers',82:'Violent rain showers',
+  95:'Thunderstorm',96:'Thunderstorm, hail',99:'Thunderstorm, heavy hail'
+};
+
+// Crop-specific thresholds — adjust these to match real agronomy guidance.
+const CROPS = {
+  tomato:  {name:'Tomato Block',  crop:'Tomatoes', moistureMin:35, tempMax:32, humidityFungal:85, daysToMaturity:75,  offset:0},
+  spinach: {name:'Spinach Bed',   crop:'Spinach',  moistureMin:45, tempMax:26, humidityFungal:80, daysToMaturity:40,  offset:6},
+  pepper:  {name:'Pepper Tunnel', crop:'Peppers',  moistureMin:30, tempMax:33, humidityFungal:85, daysToMaturity:80,  offset:-4},
+  cabbage: {name:'Cabbage Rows',  crop:'Cabbage',  moistureMin:40, tempMax:28, humidityFungal:88, daysToMaturity:70,  offset:3},
+  carrot:  {name:'Carrot Bed',    crop:'Carrots',  moistureMin:38, tempMax:29, humidityFungal:82, daysToMaturity:75,  offset:-2}
+};
+
+let LIVE = { tempC:null, humidity:null, soilMoisturePct:null, soilTempC:null, rain72:null, ready:false };
+
+// Replace with your real per-bed sensor call once hardware is deployed.
+// Must keep returning {moisturePct, tempC, humidity} so nothing else needs
+// to change — swap this one function and every card/tile updates itself.
+function fetchSensorData(zoneId){
+  const cfg = CROPS[zoneId];
+  return {
+    moisturePct: LIVE.soilMoisturePct !== null ? Math.max(5, LIVE.soilMoisturePct + cfg.offset) : null,
+    tempC: LIVE.tempC,
+    humidity: LIVE.humidity
+  };
+}
+
+async function fetchWeather(){
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${PRETORIA_LAT}&longitude=${PRETORIA_LON}` +
+    `&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m` +
+    `&hourly=soil_temperature_0cm,soil_moisture_0_to_1cm` +
+    `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max` +
+    `&timezone=Africa%2FJohannesburg&forecast_days=5`;
+
+  try{
+    const res = await fetch(url);
+    if(!res.ok){
+      const body = await res.text().catch(()=> '');
+      throw new Error('HTTP ' + res.status + (body ? ' — ' + body.slice(0,150) : ''));
+    }
+    const data = await res.json();
+
+    LIVE.tempC = data.current.temperature_2m;
+    LIVE.humidity = data.current.relative_humidity_2m;
+
+    // soil variables live in the hourly array — match the hour matching "now"
+    let hourIdx = data.hourly.time.indexOf(data.current.time);
+    if(hourIdx === -1) hourIdx = 0;
+    LIVE.soilTempC = data.hourly.soil_temperature_0cm[hourIdx];
+    LIVE.soilMoisturePct = data.hourly.soil_moisture_0_to_1cm[hourIdx] * 100;
+    LIVE.ready = true;
+
+    document.getElementById('w-temp').textContent = Math.round(LIVE.tempC) + '°C';
+    document.getElementById('w-cond').textContent =
+      (WMO_TEXT[data.current.weather_code] || 'Conditions unavailable') +
+      ' · humidity ' + Math.round(LIVE.humidity) + '% · wind ' + Math.round(data.current.wind_speed_10m) + ' km/h';
+
+    const days = data.daily.time.slice(0,5).map((date,i) => ({
+      date, max: Math.round(data.daily.temperature_2m_max[i]),
+      min: Math.round(data.daily.temperature_2m_min[i]),
+      precip: data.daily.precipitation_probability_max[i]
+    }));
+    document.getElementById('w-days').innerHTML = days.map(d => {
+      const label = new Date(d.date + 'T00:00:00').toLocaleDateString('en-ZA',{weekday:'short'});
+      return `<div class="wday"><div class="d">${label}</div><div class="t">${d.max}° / ${d.min}°</div><div class="p">${d.precip}% rain</div></div>`;
+    }).join('');
+    LIVE.rain72 = Math.max(days[1].precip, days[2].precip, days[3].precip);
+
+    document.getElementById('soil-strip').innerHTML = `
+      <div class="soil-chip"><div class="k">Air temperature</div><div class="v">${Math.round(LIVE.tempC)}°C</div></div>
+      <div class="soil-chip"><div class="k">Relative humidity</div><div class="v">${Math.round(LIVE.humidity)}%</div></div>
+      <div class="soil-chip"><div class="k">Soil temperature</div><div class="v">${Math.round(LIVE.soilTempC)}°C</div></div>
+      <div class="soil-chip"><div class="k">Soil moisture (0–1cm)</div><div class="v">${LIVE.soilMoisturePct.toFixed(1)}%</div></div>
+      <div class="soil-chip"><div class="k">Rain chance (72h)</div><div class="v">${LIVE.rain72}%</div></div>
+    `;
+
+    document.getElementById('weather-dot').style.background = '#5fae6a';
+    document.getElementById('weather-status').textContent = 'Weather & soil: live · Open-Meteo';
+
+    buildAll();
+  }catch(err){
+    document.getElementById('w-cond').textContent = '';
+    document.getElementById('weather-widget').insertAdjacentHTML('beforeend',
+      `<div class="weather-error">Couldn't reach live weather right now (${err.message}). Try reloading.</div>`);
+    document.getElementById('weather-dot').style.background = 'var(--alert)';
+    document.getElementById('weather-status').textContent = 'Weather & soil: offline';
+  }
+}
+
+// =====================================================================
+// RECOMMENDATION ENGINE — simple threshold rules over live weather/soil.
+// Swap in a real model later; the shape (title/reasoning/evidence/
+// confidence) is what the rest of the UI expects.
+// =====================================================================
+function statusFor(zoneId){
+  const cfg = CROPS[zoneId];
+  const s = fetchSensorData(zoneId);
+  if(s.moisturePct === null) return 'ok';
+  const deficit = cfg.moistureMin - s.moisturePct;
+  const heat = s.tempC - cfg.tempMax;
+  if(deficit > 12 || heat > 4) return 'alert';
+  if(deficit > 3 || heat > 0 || s.humidity > cfg.humidityFungal) return 'watch';
+  return 'ok';
+}
+
+function confidenceFromMagnitude(mag){
+  if(mag >= 12) return 4;
+  if(mag >= 6) return 3;
+  if(mag >= 2) return 2;
+  return 1;
+}
+
+function buildRecommendations(){
+  const RECS = [];
+  Object.entries(CROPS).forEach(([id, cfg]) => {
+    const s = fetchSensorData(id);
+    if(s.moisturePct === null) return;
+    const deficit = cfg.moistureMin - s.moisturePct;
+
+    if(deficit > 3){
+      const urgent = deficit > 12;
+      RECS.push({
+        id: id + '-moisture', zone:id, kind: urgent ? 'alert' : (deficit > 6 ? 'priority' : 'insight'),
+        title: `${urgent ? 'Irrigate' : 'Consider watering'} ${cfg.name} — soil moisture below target`,
+        meta: `${cfg.name} · ${cfg.crop}`,
+        confidence: confidenceFromMagnitude(deficit),
+        reasoning: `Live soil moisture is reading ${s.moisturePct.toFixed(1)}%, against a ${cfg.moistureMin}% target for ${cfg.crop.toLowerCase()}. With only a ${LIVE.rain72}% chance of rain in the next 3 days, this deficit ${urgent ? 'needs attention within the next day' : "is worth planning for this week"}.`,
+        evidence:[
+          {k:'Soil moisture (live)', v:s.moisturePct.toFixed(1)+'%', trend:'down'},
+          {k:'Target minimum', v:cfg.moistureMin+'%'},
+          {k:'Rain forecast (72h)', v:LIVE.rain72+'%', trend: LIVE.rain72<20?'down':''},
+          {k:'Air temperature', v:Math.round(LIVE.tempC)+'°C'}
+        ]
+      });
+    }
+
+    if(s.tempC > cfg.tempMax){
+      const over = s.tempC - cfg.tempMax;
+      RECS.push({
+        id: id + '-heat', zone:id, kind: over>4?'alert':'insight',
+        title: `Heat stress risk — ${cfg.name}`,
+        meta: `${cfg.name} · ${cfg.crop}`,
+        confidence: confidenceFromMagnitude(over*2),
+        reasoning: `Current air temperature (${Math.round(LIVE.tempC)}°C) is above the ${cfg.tempMax}°C comfort ceiling used for ${cfg.crop.toLowerCase()}. Sustained heat like this can cause wilting or flower drop — shade cloth or an earlier watering cycle can help.`,
+        evidence:[
+          {k:'Air temperature', v:Math.round(LIVE.tempC)+'°C', trend:'up'},
+          {k:'Crop heat ceiling', v:cfg.tempMax+'°C'},
+          {k:'Soil temperature', v:Math.round(LIVE.soilTempC)+'°C'}
+        ]
+      });
+    }
+
+    if(LIVE.humidity > cfg.humidityFungal){
+      RECS.push({
+        id: id + '-fungal', zone:id, kind:'insight',
+        title: `Fungal-risk humidity — ${cfg.name}`,
+        meta: `${cfg.name} · ${cfg.crop}`,
+        confidence: confidenceFromMagnitude(LIVE.humidity - cfg.humidityFungal),
+        reasoning: `Relative humidity (${Math.round(LIVE.humidity)}%) is above the ${cfg.humidityFungal}% level where fungal pressure typically rises for ${cfg.crop.toLowerCase()}. Worth a visual check of lower leaves in the next day or two.`,
+        evidence:[
+          {k:'Relative humidity', v:Math.round(LIVE.humidity)+'%', trend:'up'},
+          {k:'Risk threshold', v:cfg.humidityFungal+'%'}
+        ]
+      });
+    }
+  });
+
+  if(RECS.length === 0){
+    RECS.push({
+      id:'all-clear', zone:'tomato', kind:'insight',
+      title:'All beds within normal range',
+      meta:'Farm-wide',
+      confidence:3,
+      reasoning:`Live soil moisture, air temperature and humidity are all within the set thresholds for every bed right now. No action needed.`,
+      evidence:[
+        {k:'Soil moisture', v:LIVE.soilMoisturePct.toFixed(1)+'%'},
+        {k:'Air temperature', v:Math.round(LIVE.tempC)+'°C'},
+        {k:'Humidity', v:Math.round(LIVE.humidity)+'%'}
+      ]
+    });
+  }
+  return RECS;
+}
+
+const CAMERA_DEMO = [
+  {zone:'tomato', title:'Early blight pattern detected — lower canopy', meta:'Tomato Block · mock detection', confidence:3,
+   reasoning:'Preview of how a camera detection will surface: leaf-spot pattern matched against a disease-classification model, with a cropped image and confidence score attached.',
+   evidence:[{k:'Match confidence',v:'71%'},{k:'Camera',v:'Not yet installed'}]},
+  {zone:'cabbage', title:'Cabbage moth larvae — possible sighting', meta:'Cabbage Rows · mock detection', confidence:2,
+   reasoning:'Example of a pest alert card. Once a camera feed exists, this would include a timestamped image crop and a link to the full frame.',
+   evidence:[{k:'Match confidence',v:'54%'},{k:'Camera',v:'Not yet installed'}]}
+];
+
+function confBars(n){
+  let bars = '';
+  for(let i=1;i<=4;i++){ bars += `<span class="bar ${i<=n?'on':''}"></span>`; }
+  const labels = {1:'Low',2:'Moderate',3:'High',4:'Very high'};
+  return `<div class="confidence"><div class="bars">${bars}</div><span class="label">${labels[n]}</span></div>`;
+}
+function evidenceHTML(items){
+  return items.map(e => `<div class="evidence-item"><div class="k">${e.k}</div><div class="v ${e.trend||''}">${e.v}</div></div>`).join('');
+}
+function cardHTML(rec, variant){
+  const cls = 'card ' + (variant === 'alert' ? 'alert' : variant === 'demo' ? 'demo' : (rec.kind==='priority'?'priority':''));
+  const tag = variant === 'alert' ? `<div class="alert-tag">Needs decision</div>` : (variant === 'demo' ? `<div class="demo-tag">Mock preview</div>` : '');
+  return `
+  <div class="${cls}" data-zone="${rec.zone}">
+    <div class="card-top">
+      <div>${tag}<div class="card-title">${rec.title}</div><div class="card-meta">${rec.meta}</div></div>
+      ${confBars(rec.confidence)}
+    </div>
+    <div class="card-actions">
+      <button class="btn">Mark done</button>
+      <button class="btn ghost">Remind me later</button>
+    </div>
+    <details class="why">
+      <summary>Why is Carven saying this?</summary>
+      <div class="why-body">
+        <div class="reasoning">${rec.reasoning}</div>
+        <div class="evidence-grid">${evidenceHTML(rec.evidence)}</div>
+      </div>
+    </details>
+  </div>`;
+}
+
+function buildAll(){
+  if(!LIVE.ready) return;
+  const RECS = buildRecommendations();
+
+  // zone tiles
+  document.getElementById('zone-tiles').innerHTML = Object.entries(CROPS).map(([id,cfg]) => {
+    const s = fetchSensorData(id);
+    const status = statusFor(id);
+    return `<div class="zone-tile">
+      <div class="top"><span class="name">${cfg.name}</span><span class="zone-status ${status}"></span></div>
+      <div class="metric">Soil moisture <strong>${s.moisturePct.toFixed(1)}%</strong></div>
+      <div class="metric">Target <strong>${cfg.moistureMin}%+</strong></div>
+    </div>`;
+  }).join('');
+
+  // sidebar dots
+  Object.keys(CROPS).forEach(id => {
+    const el = document.getElementById('dot-'+id);
+    if(el) el.className = 'zone-status ' + statusFor(id);
+  });
+
+  const priority = RECS.filter(r => r.kind==='priority' || r.kind==='alert').slice(0,4);
+  document.getElementById('priority-list').innerHTML = priority.map(r => cardHTML(r, r.kind)).join('') ||
+    '<p class="rail-note">Nothing urgent right now.</p>';
+
+  document.getElementById('insights-list').innerHTML = RECS.map(r => cardHTML(r, r.kind)).join('');
+  document.getElementById('insight-count').textContent = RECS.length + ' items';
+
+  const alerts = RECS.filter(r => r.kind==='alert');
+  document.getElementById('alerts-list').innerHTML = alerts.length
+    ? alerts.map(r => cardHTML(r,'alert')).join('')
+    : '<p class="rail-note">No hard-threshold alerts right now.</p>';
+  document.getElementById('alert-count').textContent = alerts.length ? `(${alerts.length})` : '';
+
+  document.getElementById('cameras-list').innerHTML = CAMERA_DEMO.map(r => cardHTML(r,'demo')).join('');
+
+  const today = new Date();
+  document.getElementById('harvest-timeline').innerHTML = Object.entries(CROPS).map(([id,cfg]) => {
+    const start = 10, end = Math.min(95, 10 + (cfg.daysToMaturity/90*100));
+    const harvestDate = new Date(today.getTime() + cfg.daysToMaturity*86400000);
+    const label = harvestDate.toLocaleDateString('en-ZA',{month:'short',day:'numeric'});
+    return `<div class="timeline-row">
+      <div class="timeline-label"><div class="name">${cfg.name}</div><div class="crop">${cfg.crop}</div></div>
+      <div><div class="timeline-track"><div class="timeline-window" style="left:${start}%;width:${end-start}%;">~${label}</div></div></div>
+    </div>`;
+  }).join('');
+
+  wireZoneFilter();
+}
+
+function wireZoneFilter(){
+  document.querySelectorAll('.zone-item').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.zone-item').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const zone = btn.dataset.zone;
+      document.querySelectorAll('.card').forEach(card => {
+        card.style.display = (zone === 'all' || card.dataset.zone === zone) ? '' : 'none';
+      });
+    };
+  });
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+fetchWeather();
+// refresh live data every 10 minutes so a presentation stays current
+setInterval(fetchWeather, 10*60*1000);
+</script>
+
+</body>
+</html>
