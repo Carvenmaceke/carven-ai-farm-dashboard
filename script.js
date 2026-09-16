@@ -3,6 +3,25 @@ const PRETORIA_LON = 28.2293;
 
 const WMO_TEXT = {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Depositing rime fog',51:'Light drizzle',53:'Drizzle',55:'Dense drizzle',61:'Slight rain',63:'Rain',65:'Heavy rain',71:'Slight snow',73:'Snow',75:'Heavy snow',80:'Rain showers',81:'Rain showers',82:'Violent rain showers',95:'Thunderstorm',96:'Thunderstorm, hail',99:'Thunderstorm, heavy hail'};
 
+// Weather-code → icon category, then rendered as flat SVG glyphs (sun/cloud/rain/etc)
+function wmoCategory(code){
+  if(code === 0 || code === 1) return 'sun';
+  if(code === 2) return 'partly';
+  if(code === 3 || code === 45 || code === 48) return 'cloud';
+  if([51,53,55,61,63,65,80,81,82].includes(code)) return 'rain';
+  if([71,73,75].includes(code)) return 'snow';
+  if([95,96,99].includes(code)) return 'storm';
+  return 'cloud';
+}
+const SUN_SVG = `<svg viewBox="0 0 24 24" width="30" height="30"><circle cx="12" cy="12" r="5.2" fill="#e6a13c"/><g stroke="#e6a13c" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></g></svg>`;
+const CLOUD_SVG = `<svg viewBox="0 0 24 24" width="30" height="30"><path d="M7 18a4.5 4.5 0 01-.5-8.97A5.5 5.5 0 0117 8.5a4 4 0 01-.3 8H7z" fill="#c7cdb8" stroke="#a9b096" stroke-width="0.6"/></svg>`;
+const PARTLY_SVG = `<svg viewBox="0 0 24 24" width="30" height="30"><circle cx="8.5" cy="8.5" r="3.6" fill="#e6a13c"/><path d="M9 17.5a4.3 4.3 0 01-.4-8.58A5.2 5.2 0 0118.2 9.9a3.8 3.8 0 01-.4 7.6H9z" fill="#c7cdb8" stroke="#a9b096" stroke-width="0.6"/></svg>`;
+const RAIN_SVG = `<svg viewBox="0 0 24 24" width="30" height="30"><path d="M7 14.5a4.2 4.2 0 01-.4-8.38A5.1 5.1 0 0116.8 7a3.7 3.7 0 01-.4 7.4H7z" fill="#a7b3c4" stroke="#8b9aad" stroke-width="0.6"/><g stroke="#5a7ab0" stroke-width="1.6" stroke-linecap="round"><path d="M8 17.5l-1 2.5M12 17.5l-1 2.5M16 17.5l-1 2.5"/></g></svg>`;
+const STORM_SVG = `<svg viewBox="0 0 24 24" width="30" height="30"><path d="M7 13.5a4.2 4.2 0 01-.4-8.38A5.1 5.1 0 0116.8 6a3.7 3.7 0 01-.4 7.4H7z" fill="#9aa0ad" stroke="#7d8492" stroke-width="0.6"/><path d="M12.5 13l-2.5 4h2.3l-1.3 3.8L15 15.5h-2.3z" fill="#e6a13c"/></svg>`;
+const SNOW_SVG = `<svg viewBox="0 0 24 24" width="30" height="30"><path d="M7 13.5a4.2 4.2 0 01-.4-8.38A5.1 5.1 0 0116.8 6a3.7 3.7 0 01-.4 7.4H7z" fill="#c7cdb8" stroke="#a9b096" stroke-width="0.6"/><g stroke="#8fa8c9" stroke-width="1.4" stroke-linecap="round"><path d="M8 17v4M6 18.5l4 1M6 21.5l4-3M16 17v4M14 18.5l4 1M14 21.5l4-3"/></g></svg>`;
+const ICONS_BY_CATEGORY = {sun:SUN_SVG, partly:PARTLY_SVG, cloud:CLOUD_SVG, rain:RAIN_SVG, snow:SNOW_SVG, storm:STORM_SVG};
+function weatherIconSVG(code){ return ICONS_BY_CATEGORY[wmoCategory(code)] || CLOUD_SVG; }
+
 const CROPS = {
   tomato:  {name:'Tomato Block',  crop:'Tomatoes', moistureMin:35, tempMax:32, humidityFungal:85, daysToMaturity:75,  offset:0},
   spinach: {name:'Spinach Bed',   crop:'Spinach',  moistureMin:45, tempMax:26, humidityFungal:80, daysToMaturity:40,  offset:6},
@@ -193,12 +212,18 @@ async function fetchWeather(){
     LIVE.ready = true;
 
     document.getElementById('w-temp').textContent = fmtTemp(LIVE.tempC);
+    document.getElementById('w-icon').innerHTML = weatherIconSVG(data.current.weather_code);
     document.getElementById('w-cond').textContent = (WMO_TEXT[data.current.weather_code] || 'Conditions unavailable') + ' · humidity ' + Math.round(LIVE.humidity) + '% · wind ' + Math.round(data.current.wind_speed_10m) + ' km/h';
 
-    const days = data.daily.time.slice(0,5).map((date,i) => ({date, max: data.daily.temperature_2m_max[i], min: data.daily.temperature_2m_min[i], precip: data.daily.precipitation_probability_max[i]}));
-    document.getElementById('w-days').innerHTML = days.map(d => {
+    const days = data.daily.time.slice(0,5).map((date,i) => ({date, code: data.daily.weather_code[i], max: data.daily.temperature_2m_max[i], min: data.daily.temperature_2m_min[i], precip: data.daily.precipitation_probability_max[i]}));
+    document.getElementById('w-days').innerHTML = days.map((d,i) => {
       const label = new Date(d.date + 'T00:00:00').toLocaleDateString('en-ZA',{weekday:'short'});
-      return `<div class="wday"><div class="d">${label}</div><div class="t">${fmtTemp(d.max)} / ${fmtTemp(d.min)}</div><div class="p">${d.precip}% rain</div></div>`;
+      return `<div class="wday ${i===0?'today':''}">
+        <div class="d">${i===0?'Today':label}</div>
+        <div class="wicon">${weatherIconSVG(d.code)}</div>
+        <div class="t"><strong>${fmtTemp(d.max)}</strong> ${fmtTemp(d.min)}</div>
+        <div class="p">${d.precip}% rain</div>
+      </div>`;
     }).join('');
     LIVE.rain72 = Math.max(days[1].precip, days[2].precip, days[3].precip);
 

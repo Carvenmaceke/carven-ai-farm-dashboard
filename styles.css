@@ -136,16 +136,22 @@
   /* ---------- weather hero ---------- */
   .weather-widget{display:grid;grid-template-columns:170px 1fr;border:1px solid var(--line);margin-bottom:18px;box-shadow:var(--shadow);overflow:hidden;}
   .weather-now{background:var(--ink);color:var(--field);padding:18px 20px;position:relative;background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);background-size:14px 14px;}
+  .now-row{display:flex;align-items:center;gap:8px;}
+  .now-icon svg{width:38px;height:38px;}
   .weather-now .temp{font-family:'IBM Plex Mono',monospace;font-size:40px;font-weight:600;line-height:1;letter-spacing:-0.02em;color:var(--gold);}
   .weather-now .cond{font-size:11.5px;color:#b9c2a8;margin-top:8px;line-height:1.4;}
   .weather-now .loc{font-size:9.5px;color:#8b9a7d;text-transform:uppercase;letter-spacing:0.1em;margin-top:8px;border-top:1px dashed #3d4a37;padding-top:7px;}
   .weather-panel-right{padding:16px 20px;}
   .weather-days{display:flex;overflow-x:auto;}
-  .wday{flex:1;min-width:70px;text-align:center;padding:0 10px;border-left:1px dashed var(--line);}
+  .wday{flex:1;min-width:78px;text-align:center;padding:8px 8px;border-left:1px dashed var(--line);}
   .wday:first-child{border-left:none;}
-  .wday .d{font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;}
-  .wday .t{font-size:13.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
-  .wday .p{font-size:10.5px;color:var(--teal);font-weight:700;margin-top:3px;}
+  .wday.today{background:var(--field-deep);border-radius:4px;}
+  .wday .d{font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;}
+  .wday.today .d{color:var(--gold-deep);font-weight:700;}
+  .wicon{display:flex;align-items:center;justify-content:center;margin-bottom:4px;}
+  .wday .t{font-size:12.5px;font-weight:500;font-family:'IBM Plex Mono',monospace;color:var(--muted);}
+  .wday .t strong{color:var(--ink);font-weight:700;margin-right:4px;}
+  .wday .p{font-size:10px;color:var(--teal);font-weight:700;margin-top:3px;}
   .weather-error{font-size:13px;color:var(--rust);padding:4px 0;grid-column:1/-1;background:var(--paper);}
   .source-note{font-size:10.5px;color:var(--muted);margin-top:12px;border-top:1px dashed var(--line);padding-top:8px;}
 
