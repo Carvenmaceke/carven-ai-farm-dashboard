@@ -330,6 +330,47 @@
   footer{padding:20px 32px 44px;font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:24px;font-family:'IBM Plex Mono',monospace;}
   body{padding-bottom:64px;}
 
+  /* ---------- settings ---------- */
+  .settings-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#c9d1ba;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background 0.14s ease, color 0.14s ease, transform 0.4s ease;}
+  .settings-btn:hover{background:rgba(255,255,255,0.16);color:var(--gold);transform:rotate(35deg);}
+  .settings-btn svg{width:16px;height:16px;}
+
+  .settings-backdrop{position:fixed;inset:0;background:rgba(20,32,26,0.42);z-index:700;display:none;}
+  .settings-backdrop.open{display:block;}
+  .settings-drawer{
+    position:fixed;top:0;right:0;bottom:0;width:380px;max-width:88vw;
+    background:var(--paper);border-left:1px solid var(--line);box-shadow:-14px 0 32px rgba(20,32,26,0.25);
+    z-index:701;transform:translateX(100%);transition:transform 0.22s ease;
+    display:flex;flex-direction:column;
+  }
+  .settings-drawer.open{transform:translateX(0);}
+  .settings-head{background:var(--ink);color:var(--field);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;font-family:'Spectral',serif;font-weight:700;font-size:17px;border-bottom:2px solid var(--gold);flex-shrink:0;}
+  .settings-head button{background:none;border:none;color:var(--field);font-size:15px;cursor:pointer;}
+  .settings-head button:hover{color:var(--gold);}
+  .settings-body{overflow-y:auto;flex:1;padding:6px 20px 20px;}
+  .settings-section{border-bottom:1px dashed var(--line);padding:16px 0;}
+  .settings-section:last-of-type{border-bottom:none;}
+  .settings-section h3{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold-deep);margin-bottom:12px;}
+  .setting-row{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px;}
+  .setting-row:last-child{margin-bottom:0;}
+  .setting-row.column{flex-direction:column;align-items:flex-start;gap:8px;}
+  .setting-label{font-size:13px;font-weight:600;color:var(--ink);}
+  .setting-desc{font-size:11px;color:var(--muted);line-height:1.45;margin-top:2px;}
+  .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:2px;}
+  .check-item{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink);cursor:pointer;}
+  .check-item input{accent-color:var(--teal);width:14px;height:14px;}
+  .setting-select{width:100%;padding:8px 10px;border:1px solid var(--line);background:#fff;font-family:inherit;font-size:12.5px;color:var(--ink);}
+  .seg-control{display:inline-flex;border:1px solid var(--line);}
+  .seg-control.full{width:100%;}
+  .seg-control.full .seg-btn{flex:1;}
+  .seg-btn{background:var(--field);border:none;border-right:1px solid var(--line);padding:8px 16px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;text-transform:uppercase;letter-spacing:0.03em;}
+  .seg-btn:last-child{border-right:none;}
+  .seg-btn.active{background:var(--teal);color:#fff;}
+  .quiet-range{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--muted);}
+  .quiet-range select{padding:6px 8px;}
+  .settings-footer{padding-top:16px;display:flex;flex-direction:column;gap:10px;font-size:10.5px;color:var(--muted);}
+  .settings-footer .link-action{align-self:flex-start;}
+
   /* ---------- persistent AI assistant bar ---------- */
   .chat-bar{
     position:fixed;left:0;right:0;bottom:0;height:64px;z-index:650;
@@ -409,6 +450,98 @@
     <span class="item"><span class="dot pending" id="weather-dot"></span><span id="weather-status">Weather &amp; soil: connecting…</span></span>
     <span class="item"><span class="dot off"></span><span>Sensors: demo mode</span></span>
     <span class="item"><span class="dot off"></span><span>Cameras: not connected</span></span>
+    <button class="settings-btn" id="settings-btn" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.7 1.7 0 000-3l-1-.6a7.6 7.6 0 00-.9-1.5l.3-1.2a1.7 1.7 0 00-1.2-2l-1.2-.3a7.6 7.6 0 00-1.5-.9l-.6-1a1.7 1.7 0 00-3 0l-.6 1a7.6 7.6 0 00-1.5.9l-1.2-.3a1.7 1.7 0 00-2 1.2l-.3 1.2a7.6 7.6 0 00-.9 1.5l-1 .6a1.7 1.7 0 000 3l1 .6a7.6 7.6 0 00.9 1.5l-.3 1.2a1.7 1.7 0 001.2 2l1.2.3a7.6 7.6 0 001.5.9l.6 1a1.7 1.7 0 003 0l.6-1a7.6 7.6 0 001.5-.9l1.2.3a1.7 1.7 0 002-1.2l.3-1.2a7.6 7.6 0 00.9-1.5z"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="settings-backdrop" id="settings-backdrop"></div>
+<div class="settings-drawer" id="settings-drawer">
+  <div class="settings-head">
+    <span>Settings</span>
+    <button id="settings-close" aria-label="Close">✕</button>
+  </div>
+  <div class="settings-body">
+
+    <div class="settings-section">
+      <h3>Notifications</h3>
+      <div class="setting-row">
+        <div><div class="setting-label">Alert notifications</div><div class="setting-desc">Show alerts prominently on Overview and in the nav count</div></div>
+        <label class="switch"><input type="checkbox" id="set-alerts" checked><span class="slider"></span></label>
+      </div>
+      <div class="setting-row column">
+        <div class="setting-label">Receive notifications via</div>
+        <div class="setting-desc">Saved to this browser — sending isn't wired to a backend yet</div>
+        <div class="check-grid">
+          <label class="check-item"><input type="checkbox" id="ch-email" checked> Email</label>
+          <label class="check-item"><input type="checkbox" id="ch-sms"> SMS</label>
+          <label class="check-item"><input type="checkbox" id="ch-whatsapp"> WhatsApp</label>
+          <label class="check-item"><input type="checkbox" id="ch-inapp" checked> In-app</label>
+        </div>
+      </div>
+      <div class="setting-row column">
+        <div class="setting-label">Notification frequency</div>
+        <select class="setting-select" id="set-frequency">
+          <option value="instant">Instant — as each alert fires</option>
+          <option value="daily">Daily digest</option>
+          <option value="weekly">Weekly summary</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Display</h3>
+      <div class="setting-row column">
+        <div class="setting-label">Temperature units</div>
+        <div class="seg-control" id="set-units">
+          <button class="seg-btn active" data-val="C">°C</button>
+          <button class="seg-btn" data-val="F">°F</button>
+        </div>
+      </div>
+      <div class="setting-row column">
+        <div class="setting-label">Theme</div>
+        <div class="setting-desc">Saved — visual dark theme isn't rendered in this preview yet</div>
+        <div class="seg-control" id="set-theme">
+          <button class="seg-btn active" data-val="light">Light</button>
+          <button class="seg-btn" data-val="dark">Dark</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Alert sensitivity</h3>
+      <div class="setting-desc">How far conditions must drift from target before a recommendation or alert is raised</div>
+      <div class="seg-control full" id="set-sensitivity">
+        <button class="seg-btn" data-val="low">Low</button>
+        <button class="seg-btn active" data-val="medium">Medium</button>
+        <button class="seg-btn" data-val="high">High</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Quiet hours</h3>
+      <div class="setting-row">
+        <div><div class="setting-label">Pause non-urgent alerts overnight</div><div class="setting-desc">Hard-threshold alerts still show; routine insights are held until morning</div></div>
+        <label class="switch"><input type="checkbox" id="set-quiet"><span class="slider"></span></label>
+      </div>
+      <div class="setting-row column" id="quiet-hours-row" style="display:none">
+        <div class="quiet-range">
+          <select class="setting-select" id="quiet-start">
+            <option>20:00</option><option>21:00</option><option selected>22:00</option><option>23:00</option>
+          </select>
+          <span>to</span>
+          <select class="setting-select" id="quiet-end">
+            <option>04:00</option><option selected>05:00</option><option>06:00</option><option>07:00</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-footer">
+      <span>Saved in this browser only — account-wide sync isn't built yet.</span>
+      <button class="link-action" id="settings-reset">Reset to defaults</button>
+    </div>
   </div>
 </div>
 
@@ -717,6 +850,49 @@ const CROPS = {
 
 let LIVE = { tempC:null, humidity:null, soilMoisturePct:null, soilTempC:null, rain72:null, ready:false };
 
+// =====================================================================
+// SETTINGS — persisted to this browser via localStorage. Units and
+// alert sensitivity genuinely affect what's rendered; notification
+// channels/frequency and dark theme are saved but not wired to a real
+// backend or a rendered theme yet (no delivery pipeline / not built).
+// =====================================================================
+const SETTINGS_DEFAULTS = {
+  alertNotifications: true,
+  channels: { email:true, sms:false, whatsapp:false, inapp:true },
+  frequency: 'instant',
+  units: 'C',
+  theme: 'light',
+  sensitivity: 'medium',
+  quietHours: false,
+  quietStart: '22:00',
+  quietEnd: '05:00'
+};
+let SETTINGS = loadSettings();
+
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem('farm-settings');
+    if(!raw) return {...SETTINGS_DEFAULTS};
+    return {...SETTINGS_DEFAULTS, ...JSON.parse(raw)};
+  }catch(e){ return {...SETTINGS_DEFAULTS}; }
+}
+function saveSettings(){
+  try{ localStorage.setItem('farm-settings', JSON.stringify(SETTINGS)); }catch(e){}
+}
+
+function fmtTemp(c){
+  if(c === null || c === undefined) return '—';
+  if(SETTINGS.units === 'F') return Math.round(c*9/5+32) + '°F';
+  return Math.round(c) + '°C';
+}
+function fmtTempDelta(deltaC){
+  if(SETTINGS.units === 'F') return (deltaC*1.8).toFixed(1) + '°F';
+  return deltaC.toFixed(1) + '°C';
+}
+
+const SENSITIVITY_MULT = { low:1.5, medium:1, high:0.6 };
+function sensMult(){ return SENSITIVITY_MULT[SETTINGS.sensitivity] || 1; }
+
 function fetchSensorData(zoneId){
   const cfg = CROPS[zoneId];
   return {
@@ -744,20 +920,20 @@ async function fetchWeather(){
     LIVE.soilMoisturePct = data.hourly.soil_moisture_0_to_1cm[hourIdx] * 100;
     LIVE.ready = true;
 
-    document.getElementById('w-temp').textContent = Math.round(LIVE.tempC) + '°C';
+    document.getElementById('w-temp').textContent = fmtTemp(LIVE.tempC);
     document.getElementById('w-cond').textContent = (WMO_TEXT[data.current.weather_code] || 'Conditions unavailable') + ' · humidity ' + Math.round(LIVE.humidity) + '% · wind ' + Math.round(data.current.wind_speed_10m) + ' km/h';
 
-    const days = data.daily.time.slice(0,5).map((date,i) => ({date, max: Math.round(data.daily.temperature_2m_max[i]), min: Math.round(data.daily.temperature_2m_min[i]), precip: data.daily.precipitation_probability_max[i]}));
+    const days = data.daily.time.slice(0,5).map((date,i) => ({date, max: data.daily.temperature_2m_max[i], min: data.daily.temperature_2m_min[i], precip: data.daily.precipitation_probability_max[i]}));
     document.getElementById('w-days').innerHTML = days.map(d => {
       const label = new Date(d.date + 'T00:00:00').toLocaleDateString('en-ZA',{weekday:'short'});
-      return `<div class="wday"><div class="d">${label}</div><div class="t">${d.max}° / ${d.min}°</div><div class="p">${d.precip}% rain</div></div>`;
+      return `<div class="wday"><div class="d">${label}</div><div class="t">${fmtTemp(d.max)} / ${fmtTemp(d.min)}</div><div class="p">${d.precip}% rain</div></div>`;
     }).join('');
     LIVE.rain72 = Math.max(days[1].precip, days[2].precip, days[3].precip);
 
     document.getElementById('soil-strip').innerHTML = `
-      <div class="soil-chip"><div class="k">Air temperature</div><div class="v">${Math.round(LIVE.tempC)}°C</div></div>
+      <div class="soil-chip"><div class="k">Air temperature</div><div class="v">${fmtTemp(LIVE.tempC)}</div></div>
       <div class="soil-chip"><div class="k">Relative humidity</div><div class="v">${Math.round(LIVE.humidity)}%</div></div>
-      <div class="soil-chip"><div class="k">Soil temperature</div><div class="v">${Math.round(LIVE.soilTempC)}°C</div></div>
+      <div class="soil-chip"><div class="k">Soil temperature</div><div class="v">${fmtTemp(LIVE.soilTempC)}</div></div>
       <div class="soil-chip"><div class="k">Soil moisture (0–1cm)</div><div class="v">${LIVE.soilMoisturePct.toFixed(1)}%</div></div>
       <div class="soil-chip"><div class="k">Rain chance (72h)</div><div class="v">${LIVE.rain72}%</div></div>`;
 
@@ -773,33 +949,34 @@ async function fetchWeather(){
 }
 
 function statusFor(zoneId){
-  const cfg = CROPS[zoneId]; const s = fetchSensorData(zoneId);
+  const cfg = CROPS[zoneId]; const s = fetchSensorData(zoneId); const m = sensMult();
   if(s.moisturePct === null) return 'ok';
   const deficit = cfg.moistureMin - s.moisturePct; const heat = s.tempC - cfg.tempMax;
-  if(deficit > 12 || heat > 4) return 'alert';
-  if(deficit > 3 || heat > 0 || s.humidity > cfg.humidityFungal) return 'watch';
+  if(deficit > 12*m || heat > 4*m) return 'alert';
+  if(deficit > 3*m || heat > 0 || s.humidity > cfg.humidityFungal) return 'watch';
   return 'ok';
 }
 function confidenceFromMagnitude(mag){ if(mag>=12) return 4; if(mag>=6) return 3; if(mag>=2) return 2; return 1; }
 
 function buildRecommendations(){
   const RECS = [];
+  const m = sensMult();
   Object.entries(CROPS).forEach(([id, cfg]) => {
     const s = fetchSensorData(id); if(s.moisturePct === null) return;
     const deficit = cfg.moistureMin - s.moisturePct;
-    if(deficit > 3){
-      const urgent = deficit > 12;
-      RECS.push({id:id+'-moisture', zone:id, kind: urgent?'alert':(deficit>6?'priority':'insight'),
+    if(deficit > 3*m){
+      const urgent = deficit > 12*m;
+      RECS.push({id:id+'-moisture', zone:id, kind: urgent?'alert':(deficit>6*m?'priority':'insight'),
         title:`${urgent?'Irrigate':'Consider watering'} ${cfg.name} — soil moisture below target`,
         meta:`${cfg.name} · ${cfg.crop}`, confidence: confidenceFromMagnitude(deficit),
         reasoning:`Live soil moisture is reading ${s.moisturePct.toFixed(1)}%, against a ${cfg.moistureMin}% target for ${cfg.crop.toLowerCase()}. With only a ${LIVE.rain72}% chance of rain in the next 3 days, this deficit ${urgent?'needs attention within the next day':'is worth planning for this week'}.`,
-        evidence:[{k:'Soil moisture (live)',v:s.moisturePct.toFixed(1)+'%',trend:'down'},{k:'Target minimum',v:cfg.moistureMin+'%'},{k:'Rain forecast (72h)',v:LIVE.rain72+'%',trend:LIVE.rain72<20?'down':''},{k:'Air temperature',v:Math.round(LIVE.tempC)+'°C'}]});
+        evidence:[{k:'Soil moisture (live)',v:s.moisturePct.toFixed(1)+'%',trend:'down'},{k:'Target minimum',v:cfg.moistureMin+'%'},{k:'Rain forecast (72h)',v:LIVE.rain72+'%',trend:LIVE.rain72<20?'down':''},{k:'Air temperature',v:fmtTemp(LIVE.tempC)}]});
     }
     if(s.tempC > cfg.tempMax){
       const over = s.tempC - cfg.tempMax;
-      RECS.push({id:id+'-heat', zone:id, kind: over>4?'alert':'insight', title:`Heat stress risk — ${cfg.name}`, meta:`${cfg.name} · ${cfg.crop}`, confidence: confidenceFromMagnitude(over*2),
-        reasoning:`Current air temperature (${Math.round(LIVE.tempC)}°C) is above the ${cfg.tempMax}°C comfort ceiling used for ${cfg.crop.toLowerCase()}. Sustained heat like this can cause wilting or flower drop.`,
-        evidence:[{k:'Air temperature',v:Math.round(LIVE.tempC)+'°C',trend:'up'},{k:'Crop heat ceiling',v:cfg.tempMax+'°C'},{k:'Soil temperature',v:Math.round(LIVE.soilTempC)+'°C'}]});
+      RECS.push({id:id+'-heat', zone:id, kind: over>4*m?'alert':'insight', title:`Heat stress risk — ${cfg.name}`, meta:`${cfg.name} · ${cfg.crop}`, confidence: confidenceFromMagnitude(over*2),
+        reasoning:`Current air temperature (${fmtTemp(LIVE.tempC)}) is above the ${fmtTemp(cfg.tempMax)} comfort ceiling used for ${cfg.crop.toLowerCase()}. Sustained heat like this can cause wilting or flower drop.`,
+        evidence:[{k:'Air temperature',v:fmtTemp(LIVE.tempC),trend:'up'},{k:'Crop heat ceiling',v:fmtTemp(cfg.tempMax)},{k:'Soil temperature',v:fmtTemp(LIVE.soilTempC)}]});
     }
     if(LIVE.humidity > cfg.humidityFungal){
       RECS.push({id:id+'-fungal', zone:id, kind:'insight', title:`Fungal-risk humidity — ${cfg.name}`, meta:`${cfg.name} · ${cfg.crop}`, confidence: confidenceFromMagnitude(LIVE.humidity-cfg.humidityFungal),
@@ -810,7 +987,7 @@ function buildRecommendations(){
   if(RECS.length === 0){
     RECS.push({id:'all-clear', zone:'tomato', kind:'insight', title:'All beds within normal range', meta:'Farm-wide', confidence:3,
       reasoning:`Live soil moisture, air temperature and humidity are all within thresholds for every bed right now. No action needed.`,
-      evidence:[{k:'Soil moisture',v:LIVE.soilMoisturePct.toFixed(1)+'%'},{k:'Air temperature',v:Math.round(LIVE.tempC)+'°C'},{k:'Humidity',v:Math.round(LIVE.humidity)+'%'}]});
+      evidence:[{k:'Soil moisture',v:LIVE.soilMoisturePct.toFixed(1)+'%'},{k:'Air temperature',v:fmtTemp(LIVE.tempC)},{k:'Humidity',v:Math.round(LIVE.humidity)+'%'}]});
   }
   return RECS;
 }
@@ -914,13 +1091,15 @@ document.getElementById('zone-tiles').innerHTML = Object.entries(CROPS).map(([id
   }).join('');
   Object.keys(CROPS).forEach(id => { const el = document.getElementById('dot-'+id); if(el) el.className = 'zone-status ' + statusFor(id); });
 
-  const priority = RECS.filter(r => r.kind==='priority' || r.kind==='alert').slice(0,4);
+  const priority = SETTINGS.alertNotifications
+    ? RECS.filter(r => r.kind==='priority' || r.kind==='alert').slice(0,4)
+    : RECS.filter(r => r.kind==='priority').slice(0,4);
   document.getElementById('priority-list').innerHTML = priority.map((r,i) => cardHTML(r, r.kind, i)).join('') || '<p class="rail-note">Nothing urgent right now.</p>';
   document.getElementById('insights-list').innerHTML = RECS.map((r,i) => cardHTML(r, r.kind, i)).join('');
   document.getElementById('insight-count').textContent = RECS.length + ' items';
   const alerts = RECS.filter(r => r.kind==='alert');
   document.getElementById('alerts-list').innerHTML = alerts.length ? alerts.map((r,i) => cardHTML(r,'alert',i)).join('') : '<p class="rail-note">No hard-threshold alerts right now.</p>';
-  document.getElementById('alert-count').textContent = alerts.length ? `(${alerts.length})` : '';
+  document.getElementById('alert-count').textContent = (SETTINGS.alertNotifications && alerts.length) ? `(${alerts.length})` : '';
   document.getElementById('irrigation-list').innerHTML = RECS.filter(r=>r.id.includes('moisture')).map((r,i) => cardHTML(r, r.kind, i)).join('') || '<p class="rail-note">No irrigation action needed right now.</p>';
 
   const today = new Date();
@@ -1089,13 +1268,13 @@ function answerFarmQuestion(q){
     const deficit = cfg.moistureMin - s.moisturePct; const heat = s.tempC - cfg.tempMax;
     const causes = [];
     if(deficit > 3) causes.push(`soil moisture running ${deficit.toFixed(1)} points below target`);
-    if(heat > 0) causes.push(`air temperature ${heat.toFixed(1)}°C above this crop's comfort ceiling`);
+    if(heat > 0) causes.push(`air temperature ${fmtTempDelta(heat)} above this crop's comfort ceiling`);
     if(LIVE.humidity > cfg.humidityFungal) causes.push(`humidity above the fungal-risk threshold`);
     const cam = CAM_NODES.find(c => c.zone === (zoneId||'tomato'));
     if(cam && cam.health < 80) causes.push(`camera plant-health index reading ${cam.health}/100`);
     return {
       answer: causes.length ? `${cfg.name} shows early stress signals.` : `${cfg.name} looks within normal range right now.`,
-      evidence:[`Soil moisture: ${s.moisturePct.toFixed(1)}% (target ${cfg.moistureMin}%)`, `Air temperature: ${Math.round(LIVE.tempC)}°C (ceiling ${cfg.tempMax}°C)`, `Humidity: ${Math.round(LIVE.humidity)}% (fungal risk above ${cfg.humidityFungal}%)`, ...(cam?[`Camera plant-health index: ${cam.health}/100`]:[])],
+      evidence:[`Soil moisture: ${s.moisturePct.toFixed(1)}% (target ${cfg.moistureMin}%)`, `Air temperature: ${fmtTemp(LIVE.tempC)} (ceiling ${fmtTemp(cfg.tempMax)})`, `Humidity: ${Math.round(LIVE.humidity)}% (fungal risk above ${cfg.humidityFungal}%)`, ...(cam?[`Camera plant-health index: ${cam.health}/100`]:[])],
       reason: causes.length ? causes.join('; ') + '.' : 'All tracked conditions are within threshold.',
       recommendation: causes.length ? 'Review the Insights tab for the matching recommendation card and evidence.' : 'No action needed.'
     };
@@ -1126,7 +1305,7 @@ function answerFarmQuestion(q){
 
   return {
     answer:`Here's the current status for ${cfg.name}.`,
-    evidence:[`Soil moisture: ${s.moisturePct.toFixed(1)}%`, `Air temperature: ${Math.round(LIVE.tempC)}°C`, `Humidity: ${Math.round(LIVE.humidity)}%`, ...(recsForZone.length?[`${recsForZone.length} live insight(s) for this bed`]:[])],
+    evidence:[`Soil moisture: ${s.moisturePct.toFixed(1)}%`, `Air temperature: ${fmtTemp(LIVE.tempC)}`, `Humidity: ${Math.round(LIVE.humidity)}%`, ...(recsForZone.length?[`${recsForZone.length} live insight(s) for this bed`]:[])],
     reason:'General status check — no specific concern matched in your question.',
     recommendation:'Ask about watering, stress, pests, pumps, harvest timing, alerts, or past decisions for a more specific answer.'
   };
@@ -1222,8 +1401,78 @@ document.querySelectorAll('.area-btn').forEach(btn => {
   });
 });
 
+function initSettings(){
+  const drawer = document.getElementById('settings-drawer');
+  const backdrop = document.getElementById('settings-backdrop');
+  const openDrawer = () => { drawer.classList.add('open'); backdrop.classList.add('open'); };
+  const closeDrawer = () => { drawer.classList.remove('open'); backdrop.classList.remove('open'); };
+
+  document.getElementById('settings-btn').addEventListener('click', openDrawer);
+  document.getElementById('settings-close').addEventListener('click', closeDrawer);
+  backdrop.addEventListener('click', closeDrawer);
+
+  function applyToControls(){
+    document.getElementById('set-alerts').checked = SETTINGS.alertNotifications;
+    document.getElementById('ch-email').checked = SETTINGS.channels.email;
+    document.getElementById('ch-sms').checked = SETTINGS.channels.sms;
+    document.getElementById('ch-whatsapp').checked = SETTINGS.channels.whatsapp;
+    document.getElementById('ch-inapp').checked = SETTINGS.channels.inapp;
+    document.getElementById('set-frequency').value = SETTINGS.frequency;
+    document.getElementById('set-quiet').checked = SETTINGS.quietHours;
+    document.getElementById('quiet-hours-row').style.display = SETTINGS.quietHours ? '' : 'none';
+    document.getElementById('quiet-start').value = SETTINGS.quietStart;
+    document.getElementById('quiet-end').value = SETTINGS.quietEnd;
+    document.querySelectorAll('#set-units .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === SETTINGS.units));
+    document.querySelectorAll('#set-theme .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === SETTINGS.theme));
+    document.querySelectorAll('#set-sensitivity .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === SETTINGS.sensitivity));
+  }
+  applyToControls();
+
+  function persistAndRerender(){
+    saveSettings();
+    if(LIVE.ready) buildAll();
+  }
+
+  document.getElementById('set-alerts').addEventListener('change', (e) => { SETTINGS.alertNotifications = e.target.checked; persistAndRerender(); });
+  document.getElementById('ch-email').addEventListener('change', (e) => { SETTINGS.channels.email = e.target.checked; saveSettings(); });
+  document.getElementById('ch-sms').addEventListener('change', (e) => { SETTINGS.channels.sms = e.target.checked; saveSettings(); });
+  document.getElementById('ch-whatsapp').addEventListener('change', (e) => { SETTINGS.channels.whatsapp = e.target.checked; saveSettings(); });
+  document.getElementById('ch-inapp').addEventListener('change', (e) => { SETTINGS.channels.inapp = e.target.checked; saveSettings(); });
+  document.getElementById('set-frequency').addEventListener('change', (e) => { SETTINGS.frequency = e.target.value; saveSettings(); });
+  document.getElementById('set-quiet').addEventListener('change', (e) => {
+    SETTINGS.quietHours = e.target.checked;
+    document.getElementById('quiet-hours-row').style.display = SETTINGS.quietHours ? '' : 'none';
+    saveSettings();
+  });
+  document.getElementById('quiet-start').addEventListener('change', (e) => { SETTINGS.quietStart = e.target.value; saveSettings(); });
+  document.getElementById('quiet-end').addEventListener('change', (e) => { SETTINGS.quietEnd = e.target.value; saveSettings(); });
+
+  function wireSeg(containerId, key, onChange){
+    document.querySelectorAll('#'+containerId+' .seg-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#'+containerId+' .seg-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        SETTINGS[key] = btn.dataset.val;
+        if(onChange) onChange();
+        saveSettings();
+      });
+    });
+  }
+  wireSeg('set-units', 'units', persistAndRerender);
+  wireSeg('set-theme', 'theme');
+  wireSeg('set-sensitivity', 'sensitivity', persistAndRerender);
+
+  document.getElementById('settings-reset').addEventListener('click', () => {
+    SETTINGS = {...SETTINGS_DEFAULTS};
+    saveSettings();
+    applyToControls();
+    if(LIVE.ready) buildAll();
+  });
+}
+
 fetchWeather();
 initAssistant();
+initSettings();
 setInterval(fetchWeather, 10*60*1000);
 </script>
 
