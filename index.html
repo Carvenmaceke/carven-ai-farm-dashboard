@@ -423,6 +423,16 @@
     font-size:11.5px;text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;flex-shrink:0;
   }
   .chat-bar-send:hover{background:#e6a13c;}
+  .chat-bar-mic{
+    width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.22);color:var(--field);cursor:pointer;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;transition:background 0.14s ease, color 0.14s ease;
+  }
+  .chat-bar-mic:hover{background:rgba(255,255,255,0.18);}
+  .chat-bar-mic svg{width:17px;height:17px;}
+  .chat-bar-mic.listening{background:var(--rust);border-color:var(--rust);color:#fff;animation:micpulse 1s ease-in-out infinite;}
+  .chat-bar-mic.unsupported{opacity:0.35;cursor:not-allowed;}
+  @keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(165,64,43,0.5);}50%{box-shadow:0 0 0 8px rgba(165,64,43,0);}}
   @media (min-width:640px){ .chat-bar-sub{display:block;} }
 
   /* ---------- expandable full panel ---------- */
@@ -873,7 +883,7 @@
       <button id="chat-close" aria-label="Collapse">Collapse ▾</button>
     </div>
   </div>
-  <div class="chat-float-note"><span class="flag">Demo logic</span> Answers scan live weather/soil, current insights &amp; alerts, camera and automation status, and Farm Memory — not scripted per question. The speaker icon above reads replies aloud using your browser's voice — genuinely live, no backend needed.</div>
+  <div class="chat-float-note"><span class="flag">Demo logic</span> Answers scan live weather/soil, current insights &amp; alerts, camera and automation status, and Farm Memory — not scripted per question. The speaker icon reads replies aloud; the microphone in the bar below lets you ask by voice — both run on your browser's built-in speech engine, no backend needed.</div>
   <div class="chat-float-body">
     <div class="chat-log" id="chat-log"></div>
   </div>
@@ -894,6 +904,9 @@
   <span class="chat-bar-label">Ask the Farm</span>
   <span class="chat-bar-sub">AI Assistant</span>
   <input type="text" id="chat-input" class="chat-bar-input" placeholder="Ask about your farm…" />
+  <button class="chat-bar-mic" id="chat-mic" aria-label="Ask by voice" title="Ask by voice">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0M12 17v4M9 21h6"/></svg>
+  </button>
   <button class="chat-bar-send" id="chat-send">Ask</button>
 </div>
 
@@ -982,6 +995,64 @@ function updateVoiceToggleUI(){
   if(!btn) return;
   btn.classList.toggle('muted', !SETTINGS.voiceEnabled);
   btn.title = SETTINGS.voiceEnabled ? 'Voice replies on — click to mute' : 'Voice replies off — click to unmute';
+}
+
+// =====================================================================
+// VOICE INPUT — real browser speech-to-text via the Web Speech API
+// (SpeechRecognition). No backend, no API key. Chrome/Edge support this
+// well; Firefox and some browsers don't — the mic button disables itself
+// with an explanatory tooltip where it's unavailable, rather than
+// pretending to listen.
+// =====================================================================
+function initVoiceInput(openPanel){
+  const micBtn = document.getElementById('chat-mic');
+  const input = document.getElementById('chat-input');
+  const RecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if(!RecognitionAPI){
+    micBtn.classList.add('unsupported');
+    micBtn.title = 'Voice input not supported in this browser';
+    micBtn.disabled = true;
+    return;
+  }
+
+  const recognition = new RecognitionAPI();
+  recognition.lang = 'en-ZA';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  let listening = false;
+
+  recognition.onstart = () => {
+    listening = true;
+    micBtn.classList.add('listening');
+    input.placeholder = 'Listening…';
+    openPanel();
+  };
+  recognition.onresult = (e) => {
+    let transcript = '';
+    for(let i=0;i<e.results.length;i++) transcript += e.results[i][0].transcript;
+    input.value = transcript;
+    if(e.results[e.results.length-1].isFinal){
+      recognition.stop();
+      if(transcript.trim()) askFarm(transcript);
+      input.value = '';
+    }
+  };
+  recognition.onerror = () => {
+    listening = false;
+    micBtn.classList.remove('listening');
+    input.placeholder = 'Ask about your farm…';
+  };
+  recognition.onend = () => {
+    listening = false;
+    micBtn.classList.remove('listening');
+    input.placeholder = 'Ask about your farm…';
+  };
+
+  micBtn.addEventListener('click', () => {
+    if(listening){ recognition.stop(); return; }
+    try{ recognition.start(); }catch(e){ /* already started */ }
+  });
 }
 
 function loadSettings(){
@@ -1568,6 +1639,8 @@ function initAssistant(){
       if(!SETTINGS.voiceEnabled) stopSpeaking();
     });
   }
+
+  initVoiceInput(openPanel);
 
   document.getElementById('memory-list').innerHTML = FARM_MEMORY.map(m => `<div class="log-row"><div class="t">${m.t}</div><div class="who">${m.who}</div><div>${m.text}</div></div>`).join('');
 
