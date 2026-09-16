@@ -312,6 +312,8 @@
   .chat-msg.user{align-self:flex-end;}
   .chat-msg .bubble{padding:10px 14px;font-size:13.5px;}
   .chat-msg.user .bubble{background:var(--ink);color:var(--field);}
+  .chat-img{max-width:220px;display:block;margin-top:8px;border:1px solid rgba(255,255,255,0.25);}
+  .chat-analyzing{font-size:12px;color:var(--muted);font-style:italic;padding:4px 0 2px;}
   .chat-msg.ai .bubble{background:#fff;border:1px solid var(--line);border-left:3px solid var(--teal);}
   .chat-msg.ai .answer{font-weight:700;margin-bottom:9px;font-family:'Spectral',serif;font-size:15.5px;}
   .chat-msg.ai .block{margin-top:9px;}
@@ -883,7 +885,7 @@
       <button id="chat-close" aria-label="Collapse">Collapse ▾</button>
     </div>
   </div>
-  <div class="chat-float-note"><span class="flag">Demo logic</span> Answers scan live weather/soil, current insights &amp; alerts, camera and automation status, and Farm Memory — not scripted per question. The speaker icon reads replies aloud; the microphone in the bar below lets you ask by voice — both run on your browser's built-in speech engine, no backend needed.</div>
+  <div class="chat-float-note"><span class="flag">Demo logic</span> Answers scan live weather/soil, current insights &amp; alerts, camera and automation status, and Farm Memory — not scripted per question. The speaker icon reads replies aloud and the microphone lets you ask by voice — both run on your browser's built-in speech engine, no backend needed. <span class="flag">Demo</span> The photo icon lets you upload a plant image; the analysis returned is a placeholder preview, not a real vision model.</div>
   <div class="chat-float-body">
     <div class="chat-log" id="chat-log"></div>
   </div>
@@ -904,6 +906,10 @@
   <span class="chat-bar-label">Ask the Farm</span>
   <span class="chat-bar-sub">AI Assistant</span>
   <input type="text" id="chat-input" class="chat-bar-input" placeholder="Ask about your farm…" />
+  <input type="file" id="chat-image-input" accept="image/*" style="display:none">
+  <button class="chat-bar-mic" id="chat-image-btn" aria-label="Upload a plant photo" title="Upload a plant photo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6" fill="currentColor" stroke="none"/><path d="M21 16l-5.5-5.5a2 2 0 00-2.8 0L5 18"/></svg>
+  </button>
   <button class="chat-bar-mic" id="chat-mic" aria-label="Ask by voice" title="Ask by voice">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0M12 17v4M9 21h6"/></svg>
   </button>
@@ -1601,6 +1607,70 @@ function askFarm(q){
   setTimeout(() => pushChatMsg('ai', answerFarmQuestion(q)), 250);
 }
 
+// =====================================================================
+// IMAGE UPLOAD — reads a photo locally in the browser (FileReader, no
+// upload to any server) and returns a mock plant-health analysis in the
+// same Answer/Evidence/Reason/Recommendation shape. There is no real
+// vision model behind this — it's a placeholder for what a real
+// image-analysis backend would return, and every response says so.
+// =====================================================================
+const IMAGE_FINDINGS = [
+  {
+    answer: "This looks like early-stage leaf discoloration, possibly nutrient stress.",
+    evidence: ['Yellowing concentrated on older, lower leaves', 'Leaf margins intact, no clear lesion pattern'],
+    reason: "Interveinal yellowing on lower leaves is a common visual pattern for nitrogen or magnesium deficiency, though it can also follow overwatering.",
+    recommendation: "Cross-check with a soil nutrient reading before treating — this is a visual guess, not a lab result."
+  },
+  {
+    answer: "Leaf spotting consistent with early blight.",
+    evidence: ['Concentric dark spots on lower leaves', 'Surrounding tissue slightly yellowed'],
+    reason: "This ringed lesion pattern is typical of fungal leaf-spot disease, which often starts on older, lower leaves in humid conditions.",
+    recommendation: "Remove affected leaves, improve airflow, and confirm with a closer inspection if it spreads."
+  },
+  {
+    answer: "No clear signs of disease or pest damage — this looks healthy.",
+    evidence: ['Even leaf color across the frame', 'No visible lesions, holes, or webbing'],
+    reason: "Leaf color and structure look within normal range for this growth stage.",
+    recommendation: "No action needed — keep monitoring as usual."
+  },
+  {
+    answer: "Possible pest damage — irregular holes visible on the leaves.",
+    evidence: ['Irregular chewed-edge holes', 'No insect visible in this frame'],
+    reason: "Chewed leaf margins without a visible pest often points to a nighttime feeder like caterpillars or slugs.",
+    recommendation: "Check the underside of leaves at dusk, or compare against the Cameras tab's plant-health index."
+  }
+];
+
+function generatePlantImageAnalysis(){
+  const pick = IMAGE_FINDINGS[Math.floor(Math.random()*IMAGE_FINDINGS.length)];
+  const confidence = Math.floor(50 + Math.random()*40);
+  return {
+    answer: pick.answer,
+    evidence: [`Visual match confidence: ${confidence}% (demo estimate)`, ...pick.evidence, 'No real vision model connected — this is a placeholder response'],
+    reason: pick.reason,
+    recommendation: pick.recommendation
+  };
+}
+
+function askFarmWithImage(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    const log = document.getElementById('chat-log');
+    log.insertAdjacentHTML('beforeend', `<div class="chat-msg user"><div class="bubble">Uploaded a photo for analysis<img class="chat-img" src="${dataUrl}" alt="Uploaded plant photo"></div></div>`);
+    log.scrollTop = log.scrollHeight;
+    const analyzingId = 'analyzing-' + Date.now();
+    log.insertAdjacentHTML('beforeend', `<div class="chat-msg ai" id="${analyzingId}"><div class="bubble"><div class="chat-analyzing">Analyzing image…</div></div></div>`);
+    log.scrollTop = log.scrollHeight;
+    setTimeout(() => {
+      document.getElementById(analyzingId)?.remove();
+      pushChatMsg('ai', generatePlantImageAnalysis());
+    }, 900);
+  };
+  reader.readAsDataURL(file);
+}
+
 function initAssistant(){
   const floatPanel = document.getElementById('chat-float');
   const openPanel = () => floatPanel.classList.add('open');
@@ -1641,6 +1711,16 @@ function initAssistant(){
   }
 
   initVoiceInput(openPanel);
+
+  document.getElementById('chat-image-btn').addEventListener('click', () => {
+    openPanel();
+    document.getElementById('chat-image-input').click();
+  });
+  document.getElementById('chat-image-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(file) askFarmWithImage(file);
+    e.target.value = '';
+  });
 
   document.getElementById('memory-list').innerHTML = FARM_MEMORY.map(m => `<div class="log-row"><div class="t">${m.t}</div><div class="who">${m.who}</div><div>${m.text}</div></div>`).join('');
 
