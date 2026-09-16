@@ -207,6 +207,10 @@
 
   /* ---------- harvest timeline ---------- */
   .timeline-row{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:14px;padding:12px 0;border-bottom:1px dashed var(--line);}
+  .timeline-row.clickable{cursor:pointer;}
+  .timeline-detail{display:none;font-size:11.5px;color:var(--muted);margin-top:7px;}
+  .timeline-detail strong{color:var(--ink);font-family:'IBM Plex Mono',monospace;}
+  .timeline-row.expanded .timeline-detail{display:block;}
   .timeline-row:last-child{border-bottom:none;}
   .timeline-label .name{font-weight:700;font-size:13.5px;}
   .timeline-label .crop{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;}
@@ -216,6 +220,9 @@
   /* ---------- zone tiles ---------- */
   .zone-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px;margin-bottom:22px;}
   .zone-tile{--status-color:var(--ok);position:relative;border:1px solid var(--line);padding:13px 14px 12px;background:var(--paper);box-shadow:var(--shadow);overflow:hidden;}
+  .zone-tile.clickable{cursor:pointer;transition:transform 0.14s ease, box-shadow 0.14s ease;}
+  .zone-tile.clickable:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(20,32,26,0.14);}
+  .zone-tile.clickable:focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px;}
   .zone-tile::before{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 24px 24px 0;border-color:transparent var(--status-color) transparent transparent;}
   .zone-tile.status-watch{--status-color:var(--gold);}
   .zone-tile.status-alert{--status-color:var(--rust);}
@@ -229,6 +236,8 @@
   /* --- sensors --- */
   .sensor-table{width:100%;border-collapse:collapse;border:1px solid var(--line);background:var(--paper);font-size:13px;margin-bottom:8px;box-shadow:var(--shadow);}
   .sensor-table th{text-align:left;font-size:10px;color:var(--muted);font-weight:700;padding:9px 12px;border-bottom:2px solid var(--gold-deep);background:var(--field-deep);text-transform:uppercase;letter-spacing:0.05em;}
+  .sensor-table th.sortable{cursor:pointer;user-select:none;}
+  .sensor-table th.sortable:hover{color:var(--gold-deep);}
   .sensor-table td{padding:10px 12px;border-bottom:1px solid var(--line-soft);font-family:'IBM Plex Mono',monospace;font-size:12.5px;}
   .sensor-table tr:last-child td{border-bottom:none;}
   .status-pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:0.03em;}
@@ -247,7 +256,13 @@
 
   /* --- cameras --- */
   .cam-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:16px;}
-  .cam-card{border:1px solid var(--line);background:var(--paper);overflow:hidden;box-shadow:var(--shadow);}
+  .cam-card{border:1px solid var(--line);background:var(--paper);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform 0.14s ease, box-shadow 0.14s ease;}
+  .cam-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(20,32,26,0.14);}
+  .cam-card:focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px;}
+  .cam-detail{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+  .cam-card.expanded .cam-detail{display:block;}
+  .cam-detail .evidence-grid{margin-top:0;margin-bottom:9px;}
+  .cam-jump{font-size:11px;}
   .cam-thumb{height:122px;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg, #345c3e 0 12px, #2a4a33 12px 24px);position:relative;}
   .cam-thumb .badge{position:absolute;top:8px;left:8px;font-size:9.5px;font-weight:700;background:rgba(20,32,26,0.8);color:var(--field);padding:3px 8px;letter-spacing:0.05em;text-transform:uppercase;}
   .cam-body{padding:13px 15px;}
@@ -369,6 +384,15 @@
   .quiet-range select{padding:6px 8px;}
   .settings-footer{padding-top:16px;display:flex;flex-direction:column;gap:10px;font-size:10.5px;color:var(--muted);}
   .settings-footer .link-action{align-self:flex-start;}
+  .theme-swatches{display:flex;gap:9px;}
+  .swatch{width:30px;height:30px;border-radius:50%;background:var(--sw);border:2px solid transparent;cursor:pointer;transition:transform 0.14s ease, border-color 0.14s ease;}
+  .swatch:hover{transform:scale(1.08);}
+  .swatch.active{border-color:var(--ink);box-shadow:0 0 0 2px var(--paper), 0 0 0 3px var(--sw);}
+  input.setting-select{font-family:inherit;}
+  .insight-toolbar{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:16px;padding:12px 14px;background:var(--field-deep);border:1px solid var(--line);}
+  .toolbar-group{display:flex;align-items:center;gap:8px;}
+  .toolbar-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);font-weight:700;}
+  .insight-toolbar .setting-select{width:auto;min-width:170px;padding:6px 9px;font-size:12px;}
 
   /* ---------- persistent AI assistant bar ---------- */
   .chat-bar{
@@ -443,7 +467,7 @@
   <div class="brand">
     <span class="mark">AI Agriculture</span>
     <span class="sub">Farm Intelligence Platform</span>
-    <span class="farm">Highveld Vegetable Plots — Pretoria, Gauteng</span>
+    <span class="farm" id="farm-label">Highveld Vegetable Plots — Pretoria, Gauteng</span>
   </div>
   <div class="ai-health">
     <span class="item"><span class="dot pending" id="weather-dot"></span><span id="weather-status">Weather &amp; soil: connecting…</span></span>
@@ -462,6 +486,29 @@
     <button id="settings-close" aria-label="Close">✕</button>
   </div>
   <div class="settings-body">
+
+    <div class="settings-section">
+      <h3>Customize</h3>
+      <div class="setting-row column">
+        <div class="setting-label">Farm name</div>
+        <input type="text" id="set-farmname" class="setting-select" placeholder="e.g. Highveld Vegetable Plots" />
+      </div>
+      <div class="setting-row column">
+        <div class="setting-label">Location</div>
+        <input type="text" id="set-location" class="setting-select" placeholder="e.g. Pretoria, Gauteng" />
+      </div>
+      <div class="setting-row column">
+        <div class="setting-label">Accent theme</div>
+        <div class="setting-desc">Changes the highlight color used across the whole platform</div>
+        <div class="theme-swatches" id="set-accent">
+          <button class="swatch active" data-val="gold" style="--sw:#d68f2c" title="Harvest gold"></button>
+          <button class="swatch" data-val="teal" style="--sw:#0d6b5f" title="Field teal"></button>
+          <button class="swatch" data-val="rust" style="--sw:#a5402b" title="Clay rust"></button>
+          <button class="swatch" data-val="indigo" style="--sw:#4a5aa8" title="Dusk indigo"></button>
+          <button class="swatch" data-val="moss" style="--sw:#5a7a3f" title="Moss green"></button>
+        </div>
+      </div>
+    </div>
 
     <div class="settings-section">
       <h3>Notifications</h3>
@@ -663,6 +710,25 @@
     <!-- INSIGHTS -->
     <div class="panel" id="panel-insights">
       <div class="section-head"><h2>All insights</h2><span class="count" id="insight-count"></span></div>
+      <div class="insight-toolbar">
+        <div class="toolbar-group">
+          <span class="toolbar-label">Sort</span>
+          <select class="setting-select" id="insight-sort">
+            <option value="confidence">Confidence, highest first</option>
+            <option value="urgency">Urgency (alert → priority → insight)</option>
+            <option value="zone">Bed, A–Z</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <span class="toolbar-label">Show</span>
+          <select class="setting-select" id="insight-filter">
+            <option value="all">All kinds</option>
+            <option value="alert">Alerts only</option>
+            <option value="priority">Priority only</option>
+            <option value="insight">Insights only</option>
+          </select>
+        </div>
+      </div>
       <div id="insights-list"></div>
     </div>
 
@@ -674,7 +740,7 @@
 
     <!-- HARVEST -->
     <div class="panel" id="panel-harvest">
-      <div class="section-head"><h2>Predicted harvest windows</h2><span class="count">Based on typical days-to-maturity per crop</span></div>
+      <div class="section-head"><h2>Predicted harvest windows</h2><span class="count">Click a row for the exact window</span></div>
       <div class="timeline" id="harvest-timeline"></div>
     </div>
 
@@ -844,6 +910,9 @@ let LIVE = { tempC:null, humidity:null, soilMoisturePct:null, soilTempC:null, ra
 // backend or a rendered theme yet (no delivery pipeline / not built).
 // =====================================================================
 const SETTINGS_DEFAULTS = {
+  farmName: 'Highveld Vegetable Plots',
+  location: 'Pretoria, Gauteng',
+  accent: 'gold',
   alertNotifications: true,
   channels: { email:true, sms:false, whatsapp:false, inapp:true },
   frequency: 'instant',
@@ -855,6 +924,25 @@ const SETTINGS_DEFAULTS = {
   quietEnd: '05:00'
 };
 let SETTINGS = loadSettings();
+
+const ACCENT_THEMES = {
+  gold:   { gold:'#d68f2c', goldDeep:'#a3651a' },
+  teal:   { gold:'#1f8a7a', goldDeep:'#0d6b5f' },
+  rust:   { gold:'#c1543a', goldDeep:'#a5402b' },
+  indigo: { gold:'#5a6cc4', goldDeep:'#4a5aa8' },
+  moss:   { gold:'#6f9450', goldDeep:'#5a7a3f' }
+};
+function applyAccentTheme(){
+  const t = ACCENT_THEMES[SETTINGS.accent] || ACCENT_THEMES.gold;
+  document.documentElement.style.setProperty('--gold', t.gold);
+  document.documentElement.style.setProperty('--gold-deep', t.goldDeep);
+}
+function applyFarmLabel(){
+  const el = document.getElementById('farm-label');
+  if(el) el.textContent = `${SETTINGS.farmName} — ${SETTINGS.location}`;
+}
+applyAccentTheme();
+applyFarmLabel();
 
 function loadSettings(){
   try{
@@ -989,10 +1077,10 @@ const CAMERA_DEMO = [
 ];
 
 const CAM_NODES = [
-  {id:'cam1', zone:'tomato', name:'Camera 1 — Tomato Block', health:82, status:'watch', note:'Early blight pattern flagged 1h ago'},
-  {id:'cam2', zone:'cabbage', name:'Camera 2 — Cabbage Rows', health:64, status:'watch', note:'Possible moth larvae, low confidence'},
-  {id:'cam3', zone:'pepper', name:'Camera 3 — Pepper Tunnel', health:93, status:'ok', note:'No issues detected'},
-  {id:'cam4', zone:'spinach', name:'Camera 4 — Spinach Bed', health:88, status:'ok', note:'No issues detected'}
+  {id:'cam1', zone:'tomato', name:'Camera 1 — Tomato Block', health:82, status:'watch', note:'Early blight pattern flagged 1h ago', lastScan:'12 min ago', coverage:'94% of canopy', leafArea:'+3% vs last week'},
+  {id:'cam2', zone:'cabbage', name:'Camera 2 — Cabbage Rows', health:64, status:'watch', note:'Possible moth larvae, low confidence', lastScan:'8 min ago', coverage:'88% of canopy', leafArea:'-2% vs last week'},
+  {id:'cam3', zone:'pepper', name:'Camera 3 — Pepper Tunnel', health:93, status:'ok', note:'No issues detected', lastScan:'15 min ago', coverage:'97% of canopy', leafArea:'+5% vs last week'},
+  {id:'cam4', zone:'spinach', name:'Camera 4 — Spinach Bed', health:88, status:'ok', note:'No issues detected', lastScan:'10 min ago', coverage:'91% of canopy', leafArea:'+1% vs last week'}
 ];
 
 const DEVICE_STATUS = [
@@ -1056,6 +1144,39 @@ function sparkline(seed){
   return {svg:`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="#0d6b5f" stroke-width="2.5"/></svg>`, last: pts[pts.length-1]};
 }
 
+let deviceSortOnlineFirst = false;
+function renderDeviceTable(){
+  const rows = [...DEVICE_STATUS];
+  if(deviceSortOnlineFirst) rows.sort((a,b) => (a.status==='online'?0:1) - (b.status==='online'?0:1));
+  document.getElementById('device-table').innerHTML =
+    `<tr><th>Device</th><th>Zone</th><th class="sortable" id="status-th">Status ${deviceSortOnlineFirst ? '▾' : '▸'}</th><th>Power</th><th>Last seen</th></tr>` +
+    rows.map(d => `<tr><td>${d.name}</td><td>${d.zone}</td><td><span class="status-pill ${d.status}"><span class="d"></span>${d.status}</span></td><td>${d.battery}</td><td>${d.lastSeen}</td></tr>`).join('');
+  document.getElementById('status-th').addEventListener('click', () => {
+    deviceSortOnlineFirst = !deviceSortOnlineFirst;
+    renderDeviceTable();
+  });
+}
+
+function renderInsightsList(recs){
+  const sortSel = document.getElementById('insight-sort');
+  const filterSel = document.getElementById('insight-filter');
+  const sortVal = sortSel ? sortSel.value : 'confidence';
+  const filterVal = filterSel ? filterSel.value : 'all';
+  let list = filterVal === 'all' ? recs.slice() : recs.filter(r => r.kind === filterVal);
+  const urgencyRank = {alert:3, priority:2, insight:1};
+  if(sortVal === 'confidence') list.sort((a,b) => b.confidence - a.confidence);
+  else if(sortVal === 'urgency') list.sort((a,b) => urgencyRank[b.kind] - urgencyRank[a.kind]);
+  else if(sortVal === 'zone') list.sort((a,b) => (CROPS[a.zone]?.name||'').localeCompare(CROPS[b.zone]?.name||''));
+  document.getElementById('insights-list').innerHTML = list.length
+    ? list.map((r,i) => cardHTML(r, r.kind, i)).join('')
+    : '<p class="rail-note">No insights match this filter.</p>';
+}
+function initInsightToolbar(){
+  const rerender = () => { if(LIVE.ready) renderInsightsList(buildRecommendations()); };
+  document.getElementById('insight-sort').addEventListener('change', rerender);
+  document.getElementById('insight-filter').addEventListener('change', rerender);
+}
+
 function buildAll(){
   if(!LIVE.ready) return;
   const RECS = buildRecommendations();
@@ -1069,20 +1190,30 @@ const CROP_ICONS = {
 };
 document.getElementById('zone-tiles').innerHTML = Object.entries(CROPS).map(([id,cfg]) => {
     const s = fetchSensorData(id); const status = statusFor(id);
-    return `<div class="zone-tile status-${status}">
+    return `<div class="zone-tile status-${status} clickable" data-zone="${id}" role="button" tabindex="0">
       <div class="zone-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${CROP_ICONS[id]}</svg></div>
       <div class="zt-name">${cfg.name}</div>
       <div class="zt-reading">${s.moisturePct.toFixed(1)}<span class="unit">%</span></div>
       <div class="zt-target">target ${cfg.moistureMin}%+</div>
     </div>`;
   }).join('');
+  document.querySelectorAll('#zone-tiles .zone-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      const sideBtn = document.querySelector(`.rail .zone-item[data-zone="${tile.dataset.zone}"]`);
+      if(sideBtn) sideBtn.click();
+      const aiAreaBtn = document.querySelector('.area-btn[data-area="ai"]');
+      if(aiAreaBtn && !aiAreaBtn.classList.contains('active')) aiAreaBtn.click();
+      document.querySelector('.tab[data-tab="insights"]')?.click();
+    });
+    tile.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); tile.click(); } });
+  });
   Object.keys(CROPS).forEach(id => { const el = document.getElementById('dot-'+id); if(el) el.className = 'zone-status ' + statusFor(id); });
 
   const priority = SETTINGS.alertNotifications
     ? RECS.filter(r => r.kind==='priority' || r.kind==='alert').slice(0,4)
     : RECS.filter(r => r.kind==='priority').slice(0,4);
   document.getElementById('priority-list').innerHTML = priority.map((r,i) => cardHTML(r, r.kind, i)).join('') || '<p class="rail-note">Nothing urgent right now.</p>';
-  document.getElementById('insights-list').innerHTML = RECS.map((r,i) => cardHTML(r, r.kind, i)).join('');
+  renderInsightsList(RECS);
   document.getElementById('insight-count').textContent = RECS.length + ' items';
   const alerts = RECS.filter(r => r.kind==='alert');
   document.getElementById('alerts-list').innerHTML = alerts.length ? alerts.map((r,i) => cardHTML(r,'alert',i)).join('') : '<p class="rail-note">No hard-threshold alerts right now.</p>';
@@ -1093,13 +1224,25 @@ document.getElementById('zone-tiles').innerHTML = Object.entries(CROPS).map(([id
   document.getElementById('harvest-timeline').innerHTML = Object.entries(CROPS).map(([id,cfg]) => {
     const start=10, end=Math.min(95, 10+(cfg.daysToMaturity/90*100));
     const harvestDate = new Date(today.getTime() + cfg.daysToMaturity*86400000);
+    const windowStart = new Date(harvestDate.getTime() - 3*86400000);
+    const windowEnd = new Date(harvestDate.getTime() + 3*86400000);
     const label = harvestDate.toLocaleDateString('en-ZA',{month:'short',day:'numeric'});
-    return `<div class="timeline-row"><div class="timeline-label"><div class="name">${cfg.name}</div><div class="crop">${cfg.crop}</div></div><div><div class="timeline-track"><div class="timeline-window" style="left:${start}%;width:${end-start}%;">~${label}</div></div></div></div>`;
+    const rangeLabel = `${windowStart.toLocaleDateString('en-ZA',{month:'short',day:'numeric'})} – ${windowEnd.toLocaleDateString('en-ZA',{month:'short',day:'numeric'})}`;
+    return `<div class="timeline-row clickable" data-zone="${id}" tabindex="0">
+      <div class="timeline-label"><div class="name">${cfg.name}</div><div class="crop">${cfg.crop}</div></div>
+      <div>
+        <div class="timeline-track"><div class="timeline-window" style="left:${start}%;width:${end-start}%;" title="Predicted window: ${rangeLabel} (${cfg.daysToMaturity} days out)">~${label}</div></div>
+        <div class="timeline-detail">Predicted window: <strong>${rangeLabel}</strong> · ${cfg.daysToMaturity} days from typical planting</div>
+      </div>
+    </div>`;
   }).join('');
+  document.querySelectorAll('#harvest-timeline .timeline-row').forEach(row => {
+    row.addEventListener('click', () => row.classList.toggle('expanded'));
+    row.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); row.classList.toggle('expanded'); } });
+  });
 
   // Sensors tab
-  document.getElementById('device-table').innerHTML = `<tr><th>Device</th><th>Zone</th><th>Status</th><th>Power</th><th>Last seen</th></tr>` +
-    DEVICE_STATUS.map(d => `<tr><td>${d.name}</td><td>${d.zone}</td><td><span class="status-pill ${d.status}"><span class="d"></span>${d.status}</span></td><td>${d.battery}</td><td>${d.lastSeen}</td></tr>`).join('');
+  renderDeviceTable();
 
   document.getElementById('spark-grid').innerHTML = Object.entries(CROPS).map(([id,cfg],i) => {
     const {svg,last} = sparkline(i);
@@ -1108,7 +1251,7 @@ document.getElementById('zone-tiles').innerHTML = Object.entries(CROPS).map(([id
 
   // Cameras tab
   document.getElementById('cam-grid').innerHTML = CAM_NODES.map(c => `
-    <div class="cam-card">
+    <div class="cam-card clickable" data-zone="${c.zone}" tabindex="0">
       <div class="cam-thumb"><span class="badge">Demo image</span>
         <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#20281c" stroke-width="1.4"><path d="M12 2C8 6 5 10 5 14a7 7 0 0014 0c0-4-3-8-7-12z"/></svg>
       </div>
@@ -1116,9 +1259,34 @@ document.getElementById('zone-tiles').innerHTML = Object.entries(CROPS).map(([id
         <div class="title">${c.name}</div>
         <div class="meta">${c.note}</div>
         <div class="health-bar ${c.status}"><div class="fill" style="width:${c.health}%"></div></div>
-        <div class="health-label">Plant health index: ${c.health}/100</div>
+        <div class="health-label">Plant health index: ${c.health}/100 · click to expand</div>
+        <div class="cam-detail">
+          <div class="evidence-grid">
+            <div class="evidence-item"><div class="k">Last scan</div><div class="v">${c.lastScan}</div></div>
+            <div class="evidence-item"><div class="k">Canopy coverage</div><div class="v">${c.coverage}</div></div>
+            <div class="evidence-item"><div class="k">Leaf area trend</div><div class="v ${c.leafArea.startsWith('+')?'up':'down'}">${c.leafArea}</div></div>
+          </div>
+          <button class="link-action cam-jump" data-zone="${c.zone}">View this bed's insights →</button>
+        </div>
       </div>
     </div>`).join('');
+  document.querySelectorAll('#cam-grid .cam-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if(e.target.closest('.cam-jump')) return;
+      card.classList.toggle('expanded');
+    });
+    card.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); card.classList.toggle('expanded'); } });
+  });
+  document.querySelectorAll('.cam-jump').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const sideBtn = document.querySelector(`.rail .zone-item[data-zone="${btn.dataset.zone}"]`);
+      if(sideBtn) sideBtn.click();
+      const aiAreaBtn = document.querySelector('.area-btn[data-area="ai"]');
+      if(aiAreaBtn && !aiAreaBtn.classList.contains('active')) aiAreaBtn.click();
+      document.querySelector('.tab[data-tab="insights"]')?.click();
+    });
+  });
   document.getElementById('analysis-list').innerHTML = CAMERA_DEMO.map((r,i) => cardHTML(r,'demo',i)).join('');
 
   // Nutrients
@@ -1399,6 +1567,9 @@ function initSettings(){
   backdrop.addEventListener('click', closeDrawer);
 
   function applyToControls(){
+    document.getElementById('set-farmname').value = SETTINGS.farmName;
+    document.getElementById('set-location').value = SETTINGS.location;
+    document.querySelectorAll('#set-accent .swatch').forEach(b => b.classList.toggle('active', b.dataset.val === SETTINGS.accent));
     document.getElementById('set-alerts').checked = SETTINGS.alertNotifications;
     document.getElementById('ch-email').checked = SETTINGS.channels.email;
     document.getElementById('ch-sms').checked = SETTINGS.channels.sms;
@@ -1414,6 +1585,18 @@ function initSettings(){
     document.querySelectorAll('#set-sensitivity .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === SETTINGS.sensitivity));
   }
   applyToControls();
+
+  document.getElementById('set-farmname').addEventListener('input', (e) => { SETTINGS.farmName = e.target.value; applyFarmLabel(); saveSettings(); });
+  document.getElementById('set-location').addEventListener('input', (e) => { SETTINGS.location = e.target.value; applyFarmLabel(); saveSettings(); });
+  document.querySelectorAll('#set-accent .swatch').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#set-accent .swatch').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      SETTINGS.accent = btn.dataset.val;
+      applyAccentTheme();
+      saveSettings();
+    });
+  });
 
   function persistAndRerender(){
     saveSettings();
@@ -1453,6 +1636,8 @@ function initSettings(){
     SETTINGS = {...SETTINGS_DEFAULTS};
     saveSettings();
     applyToControls();
+    applyAccentTheme();
+    applyFarmLabel();
     if(LIVE.ready) buildAll();
   });
 }
@@ -1460,6 +1645,7 @@ function initSettings(){
 fetchWeather();
 initAssistant();
 initSettings();
+initInsightToolbar();
 setInterval(fetchWeather, 10*60*1000);
 </script>
 
