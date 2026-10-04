@@ -884,14 +884,14 @@ function renderOverviewStats(){
   // Defaults on; only reads as "false" once the person explicitly turns it off.
   const lowStockAlertsEnabled = localStorage.getItem("pref-low-stock-alerts") !== "false";
   const stats = [
-    { label:"Active farms", value:FARMS.length, sub:`${FIELDS.length} fields / plots`, cls:"" },
-    { label:"Fields needing attention", value: alertFields + watchFields, sub:`${alertFields} urgent, ${watchFields} watch`, cls: alertFields ? "bad" : (watchFields ? "warn" : "") },
-    { label:"Livestock batches", value:LIVESTOCK.length, sub:`${LIVESTOCK.length} active batches`, cls:"" },
-    { label:"Stock items to reorder", value:lowStock, sub:"below minimum threshold", cls: (lowStock && lowStockAlertsEnabled) ? "warn" : "" },
-    { label:"Open tasks", value:TASKS.filter(t=>t.status!=="Completed"&&t.status!=="Cancelled").length, sub:`${TASKS.filter(t=>t.status==="Completed").length} completed`, cls:"" },
-    { label:"Team members", value:TEAM.length, sub:`${TEAM.filter(t=>t.status==="Active").length} active`, cls:"" },
+    { label:"Active farms", value:FARMS.length, sub:`${FIELDS.length} fields / plots`, cls:"", perm:"farms.view" },
+    { label:"Fields needing attention", value: alertFields + watchFields, sub:`${alertFields} urgent, ${watchFields} watch`, cls: alertFields ? "bad" : (watchFields ? "warn" : ""), perm:"farms.view" },
+    { label:"Livestock batches", value:LIVESTOCK.length, sub:`${LIVESTOCK.length} active batches`, cls:"", perm:"livestock.view" },
+    { label:"Stock items to reorder", value:lowStock, sub:"below minimum threshold", cls: (lowStock && lowStockAlertsEnabled) ? "warn" : "", perm:"inventory.view" },
+    { label:"Open tasks", value:TASKS.filter(t=>t.status!=="Completed"&&t.status!=="Cancelled").length, sub:`${TASKS.filter(t=>t.status==="Completed").length} completed`, cls:"", perm:"tasks.view" },
+    { label:"Team members", value:TEAM.length, sub:`${TEAM.filter(t=>t.status==="Active").length} active`, cls:"", perm:"users.view" },
   ];
-  el.innerHTML = stats.map(s => `
+  el.innerHTML = stats.filter(s => userCan(s.perm)).map(s => `
     <div class="stat-card ${s.cls}">
       <div class="stat-label">${s.label}</div>
       <div class="stat-value">${s.value}</div>
@@ -949,7 +949,7 @@ function getCriticalItems(){
     meta:a.meta,
   }));
 
-  return items;
+  return items.filter(i => userCan(TAB_PERMS[i.tab]));
 }
 
 // Draw the Overview 'Needs urgent attention' feed
@@ -1059,9 +1059,50 @@ function renderAll(){
   populateQuickLogFieldSelect();
 }
 
+/* ---------- Permissions ----------
+   Read straight from the signed-in user's token, so the dashboard always
+   shows exactly what the API will allow. The API still enforces every
+   permission; this only hides what a role can't use. */
+function currentPermissions(){
+  if (currentPermissions.cache) return currentPermissions.cache;
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token") || "";
+  let perms = [];
+  try {
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const claims = JSON.parse(decodeURIComponent(escape(atob(payload.padEnd(Math.ceil(payload.length / 4) * 4, "=")))));
+    const raw = claims.permission;
+    perms = Array.isArray(raw) ? raw : (raw ? [raw] : []);
+  } catch { perms = []; }
+  return (currentPermissions.cache = new Set(perms));
+}
+
+// Permission needed to open each sidebar tab (matches data-perm in index.html)
+const TAB_PERMS = {
+  farms:"farms.view", structure:"greenhouses.view", crops:"crops.view",
+  livestock:"livestock.view", inventory:"inventory.view", tasks:"tasks.view",
+  users:"users.view", reports:"reports.view reports.create"
+};
+
+// True if the user has any of the permissions given (space-separated)
+function userCan(required){
+  if (!required) return true;
+  const perms = currentPermissions();
+  return String(required).split(/\s+/).some(p => perms.has(p));
+}
+
+// Hide every element marked data-perm="..." the user isn't allowed to see.
+// Elements stay in the page (other code still looks them up) but never show.
+function applyPermissionVisibility(){
+  document.querySelectorAll("[data-perm]").forEach(el => {
+    el.classList.toggle("perm-hidden", !userCan(el.dataset.perm));
+  });
+  if (!document.querySelector(".tab-btn.active:not(.perm-hidden)")) goToTab("overview");
+}
+
 /* ---------- Tabs ---------- */
 // Switch the active tab and panel
 function goToTab(tabName){
+  if (!document.querySelector(`.tab-btn[data-tab="${tabName}"]:not(.perm-hidden)`)) tabName = "overview";
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tabName));
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
   const panel = document.getElementById(`panel-${tabName}`);
@@ -1642,6 +1683,7 @@ function init(){
   setCostDateDefaults();
 
   initTabs();
+  applyPermissionVisibility();
   initForms();
   initActions();
   initOfflineDemo();

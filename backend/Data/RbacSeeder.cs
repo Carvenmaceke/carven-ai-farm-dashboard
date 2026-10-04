@@ -19,40 +19,63 @@ namespace FarmManagement.API.Data
     /// </summary>
     public static class RbacSeeder
     {
+        // Who sees what. Every role gets operations.view (the overview page),
+        // shifts.manage (clock in/out) and read access to the farm layout;
+        // each module tab beyond that needs its own "<module>.view".
+        //
+        //   Owner       - everything, including role/permission management
+        //   Manager     - runs the farm day to day: everything except
+        //                 role/permission management and deleting zones
+        //   Agronomist  - crops (view + manage), inventory and tasks (view),
+        //                 reviews field reports and adds recommendations
+        //   Technician  - inventory and tasks (view), submits field reports
+        //   Worker      - crops, livestock and tasks (view), submits field
+        //                 reports
+        //
+        // Only Owner and Manager see the team list, operating costs
+        // (finance.view) and team shift history.
+        private static readonly string[] Baseline =
+        {
+            Permissions.OperationsView, Permissions.ShiftsManage,
+            Permissions.FarmsView, Permissions.GreenhousesView, Permissions.ZonesView
+        };
+
         private static readonly Dictionary<string, string[]> RolePermissions = new()
         {
-            [Roles.Owner] = Permissions.All, // everything, including role/permission management
+            [Roles.Owner] = Permissions.All,
 
-            [Roles.Manager] = new[]
+            [Roles.Manager] = Baseline.Concat(new[]
             {
                 Permissions.UsersView, Permissions.UsersCreate,
                 Permissions.UsersUpdateRole, Permissions.UsersUpdateStatus,
-                Permissions.FarmsCreate, Permissions.FarmsView,
-                Permissions.GreenhousesCreate, Permissions.GreenhousesView,
-                Permissions.ZonesCreate, Permissions.ZonesView, Permissions.ZonesUpdate,
-                Permissions.ShiftsManage, Permissions.ShiftsViewTeam,
+                Permissions.FarmsCreate, Permissions.GreenhousesCreate,
+                Permissions.ZonesCreate, Permissions.ZonesUpdate,
+                Permissions.ShiftsViewTeam,
                 Permissions.ReportsView, Permissions.ReportsRecommend, Permissions.ReportsApprove,
-                Permissions.OperationsView, Permissions.CropManage, Permissions.LivestockManage, Permissions.InventoryManage, Permissions.TasksManage
-            },
+                Permissions.CropsView, Permissions.LivestockView, Permissions.InventoryView,
+                Permissions.TasksView, Permissions.FinanceView,
+                Permissions.CropManage, Permissions.LivestockManage,
+                Permissions.InventoryManage, Permissions.TasksManage
+            }).ToArray(),
 
-            [Roles.Worker] = new[]
+            [Roles.Agronomist] = Baseline.Concat(new[]
             {
-                Permissions.FarmsView, Permissions.GreenhousesView, Permissions.ZonesView, Permissions.OperationsView,
-                Permissions.ShiftsManage, Permissions.ReportsCreate
-            },
+                Permissions.ReportsView, Permissions.ReportsRecommend,
+                Permissions.CropsView, Permissions.CropManage,
+                Permissions.InventoryView, Permissions.TasksView
+            }).ToArray(),
 
-            [Roles.Agronomist] = new[]
+            [Roles.Technician] = Baseline.Concat(new[]
             {
-                Permissions.FarmsView, Permissions.GreenhousesView, Permissions.ZonesView,
-                Permissions.ShiftsManage,
-                Permissions.ReportsView, Permissions.ReportsRecommend, Permissions.OperationsView, Permissions.CropManage
-            },
+                Permissions.ReportsCreate,
+                Permissions.InventoryView, Permissions.TasksView
+            }).ToArray(),
 
-            [Roles.Technician] = new[]
+            [Roles.Worker] = Baseline.Concat(new[]
             {
-                Permissions.FarmsView, Permissions.GreenhousesView, Permissions.ZonesView, Permissions.OperationsView,
-                Permissions.ShiftsManage, Permissions.ReportsCreate
-            }
+                Permissions.ReportsCreate,
+                Permissions.CropsView, Permissions.LivestockView, Permissions.TasksView
+            }).ToArray()
         };
 
         public static async Task SeedAsync(ApplicationDbContext context, CancellationToken ct = default)

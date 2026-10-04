@@ -44,6 +44,11 @@ namespace FarmManagement.API.Common
         public const string ReportsApprove = "reports.approve";
 
         public const string OperationsView = "operations.view";
+        public const string CropsView = "crops.view";
+        public const string LivestockView = "livestock.view";
+        public const string InventoryView = "inventory.view";
+        public const string TasksView = "tasks.view";
+        public const string FinanceView = "finance.view";
         public const string CropManage = "crops.manage";
         public const string LivestockManage = "livestock.manage";
         public const string InventoryManage = "inventory.manage";
@@ -62,7 +67,8 @@ namespace FarmManagement.API.Common
             ZonesCreate, ZonesView, ZonesUpdate, ZonesDelete,
             ShiftsManage, ShiftsViewTeam,
             ReportsCreate, ReportsView, ReportsRecommend, ReportsApprove,
-            OperationsView, CropManage, LivestockManage, InventoryManage, TasksManage
+            OperationsView, CropsView, LivestockView, InventoryView, TasksView, FinanceView,
+            CropManage, LivestockManage, InventoryManage, TasksManage
         };
     }
 }

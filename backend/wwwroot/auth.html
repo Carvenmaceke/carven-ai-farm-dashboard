@@ -43,6 +43,45 @@
 <span aria-hidden="true" class="auth-btn-spinner"></span>
 </button>
 </form>
+
+<!-- ===================== FORGOT PASSWORD ===================== -->
+<div class="auth-form" id="forgotPanel" hidden>
+<h3>Reset your password</h3>
+<p class="auth-note">Enter your account email. If the account exists, AI FARM will provide a secure reset link.</p>
+<form id="forgotForm" novalidate>
+<div class="auth-field">
+<label for="forgotEmail">Email</label>
+<input autocomplete="email" id="forgotEmail" placeholder="you@yourfarm.com" required type="email"/>
+</div>
+<button class="auth-submit" id="forgotSubmit" type="submit">
+<span class="auth-btn-label">Send reset link</span>
+<span aria-hidden="true" class="auth-btn-spinner"></span>
+</button>
+</form>
+<button class="tab-btn" id="backToLoginFromForgot" type="button">Back to sign in</button>
+<div class="auth-note" id="developmentResetLink" hidden></div>
+</div>
+
+<!-- ===================== RESET PASSWORD ===================== -->
+<div class="auth-form" id="resetPanel" hidden>
+<h3>Choose a new password</h3>
+<p class="auth-note">Your reset link is valid for 30 minutes and can only be used once.</p>
+<form id="resetForm" novalidate>
+<div class="auth-field">
+<label for="resetPassword">New password</label>
+<input autocomplete="new-password" id="resetPassword" minlength="8" required type="password"/>
+</div>
+<div class="auth-field">
+<label for="resetConfirmPassword">Confirm password</label>
+<input autocomplete="new-password" id="resetConfirmPassword" minlength="8" required type="password"/>
+</div>
+<button class="auth-submit" id="resetSubmit" type="submit">
+<span class="auth-btn-label">Reset password</span>
+<span aria-hidden="true" class="auth-btn-spinner"></span>
+</button>
+</form>
+</div>
+
 <!-- ===================== REGISTER ===================== -->
 <form class="auth-form" id="registerForm" novalidate="">
 <p class="auth-note">

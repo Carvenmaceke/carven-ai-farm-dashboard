@@ -602,3 +602,6 @@ body.compact-tables .data-table th{padding:0.3rem 0.4rem;font-size:0.78rem;}
 .permission-actions { display:flex; align-items:center; gap:1rem; margin-top:1rem; }
 .role-permission-toolbar { align-items:center; margin-top:1rem; }
 @media (max-width: 760px) { .permission-list { grid-template-columns: 1fr; } }
+
+/* Content the signed-in role isn't permitted to see (see applyPermissionVisibility) */
+.perm-hidden { display: none !important; }
