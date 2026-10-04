@@ -264,10 +264,7 @@ function mapUserToTeamRow(u) {
 }
 
 async function loadTeam() {
-    const role = localStorage.getItem("role") || sessionStorage.getItem("role");
-    const canManageUsers = role === "Owner" || role === "Manager";
-
-    if (!canManageUsers) {
+    if (!userCan("users.view")) {
         // Worker/Agronomist/Technician accounts don't have the users.view
         // permission - the backend would return 403 for this request. No
         // point making it and confusing the console; show why instead.
@@ -277,6 +274,7 @@ async function loadTeam() {
         renderOverviewSnapshot();
         return;
     }
+    if (!userCan("users.create")) document.getElementById("team-form").style.display = "none";
 
     try {
         const response = await authFetch("/api/User");
@@ -445,8 +443,7 @@ let GREENHOUSES = [];
 let ZONES = [];
 
 function canManageFarmStructure() {
-    const role = localStorage.getItem("role") || sessionStorage.getItem("role");
-    return role === "Owner" || role === "Manager";
+    return userCan("greenhouses.create zones.create");
 }
 
 function renderGreenhouses() {
@@ -848,68 +845,54 @@ function currentUserRole() {
 }
 
 function canReviewReports() {
-    return ["Owner", "Manager", "Agronomist"].includes(currentUserRole());
+    return userCan("reports.view");
 }
 
 function canApproveReports() {
-    return ["Owner", "Manager"].includes(currentUserRole());
+    return userCan("reports.approve");
 }
 
 function canCreateReports() {
-    return ["Worker", "Technician"].includes(currentUserRole());
+    return userCan("reports.create");
 }
 
 
-/* ---------- role gating on the local-demo tabs ----------
-   Fields, Assets, Crop Lifecycle, Livestock, Inventory and Tasks have no
-   backend yet (see docs/DASHBOARD-CONNECTION.md), so there is nothing for a
-   permission policy to enforce server-side the way Reports, Users, Zones
-   and Farm are enforced. This is UI-only: it hides "add" forms from roles
-   that shouldn't normally use them, matching the same hierarchy as the
-   connected tabs, but a Worker who edits this file directly and re-submits
-   the form would still succeed, because there's no ReportsController-style
-   backend check behind it. Real enforcement for these tabs would mean
-   building the same permission-policy pattern used for Reports - worth
-   doing before this goes near real users, not before then.
+/* ---------- form gating by permission ----------
+   Each "add" form needs the matching manage permission from the signed-in
+   user's token. Roles without it see the records but get a view-only note
+   instead of the form. The API enforces the same permission on every save. */
 
-   Agronomist gets the crop-specific forms (variety/planting/treatment) in
-   addition to view access, since crop decisions are their job. Everything
-   else structural (fields, assets, livestock, purchase orders, tasks) is
-   Owner/Manager only, same as Zones and Users already are for real. */
-
-const DEMO_TAB_FORM_RULES = {
-    "field-form": ["Owner", "Manager"],
-    "asset-form": ["Owner", "Manager"],
-    "variety-form": ["Owner", "Manager", "Agronomist"],
-    "planting-form": ["Owner", "Manager", "Agronomist"],
-    "treatment-form": ["Owner", "Manager", "Agronomist"],
-    "health-obs-form": ["Owner", "Manager", "Agronomist"],
-    "harvest-form": ["Owner", "Manager", "Agronomist"],
-    "livestock-form": ["Owner", "Manager"],
-    "livestock-health-form": ["Owner", "Manager"],
-    "breeding-form": ["Owner", "Manager"],
-    "vax-form": ["Owner", "Manager"],
-    "livestock-log-form": ["Owner", "Manager"],
-    "production-form": ["Owner", "Manager"],
-    "stock-form": ["Owner", "Manager"],
-    "stock-usage-form": ["Owner", "Manager"],
-    "supplier-form": ["Owner", "Manager"],
-    "po-form": ["Owner", "Manager"],
-    "cost-form": ["Owner", "Manager"],
-    "full-task-form": ["Owner", "Manager"]
+const FORM_PERMISSIONS = {
+    "field-form": "farms.create",
+    "asset-form": "farms.create",
+    "variety-form": "crops.manage",
+    "planting-form": "crops.manage",
+    "treatment-form": "crops.manage",
+    "health-obs-form": "crops.manage",
+    "harvest-form": "crops.manage",
+    "livestock-form": "livestock.manage",
+    "livestock-health-form": "livestock.manage",
+    "breeding-form": "livestock.manage",
+    "vax-form": "livestock.manage",
+    "livestock-log-form": "livestock.manage",
+    "production-form": "livestock.manage",
+    "stock-form": "inventory.manage",
+    "stock-usage-form": "inventory.manage",
+    "supplier-form": "inventory.manage",
+    "po-form": "inventory.manage",
+    "cost-form": "inventory.manage",
+    "full-task-form": "tasks.manage"
 };
 
-function applyDemoTabRoleGating() {
-    const role = currentUserRole();
-
-    Object.entries(DEMO_TAB_FORM_RULES).forEach(([formId, allowedRoles]) => {
+function applyFormPermissions() {
+    Object.entries(FORM_PERMISSIONS).forEach(([formId, permission]) => {
         const form = document.getElementById(formId);
-        if (!form || allowedRoles.includes(role)) return;
+        if (!form || userCan(permission)) return;
 
         const notice = document.createElement("p");
         notice.className = "hint";
         notice.style.marginTop = "0.6rem";
-        notice.textContent = `View only for your role. ${allowedRoles.join(" / ")} can add here.`;
+        notice.textContent = "View only for your role.";
         form.replaceWith(notice);
     });
 }
@@ -1165,7 +1148,7 @@ let TEAM_SHIFTS = [];
 let MY_SHIFTS = [];
 
 async function loadShiftReport() {
-    const canViewTeam = ["Owner", "Manager"].includes(currentUserRole());
+    const canViewTeam = userCan("shifts.viewTeam");
 
     try {
         const myResponse = await authFetch("/api/Shifts/history");
@@ -1326,7 +1309,7 @@ function renderOverviewSnapshot() {
     // read off the same definition.
     const needsRecommendation = r => !r.recommendation || r.status === "Rejected";
 
-    if (role === "Owner" || role === "Manager") {
+    if (userCan("reports.approve")) {
         const clockedInNow = TEAM_SHIFTS.filter(s => s.isOpen).length;
         const pendingApprovals = FIELD_REPORTS.filter(r => r.status === "Pending approval").length;
         const awaitingRecommendation = FIELD_REPORTS.filter(needsRecommendation).length;
@@ -1337,7 +1320,7 @@ function renderOverviewSnapshot() {
             { label: "Reports awaiting recommendation", value: awaitingRecommendation, sub: "no recommendation yet", cls: awaitingRecommendation ? "warn" : "" },
             { label: "Pending your approval", value: pendingApprovals, sub: "recommended, not yet approved", cls: pendingApprovals ? "warn" : "" }
         );
-    } else if (role === "Agronomist") {
+    } else if (userCan("reports.view")) {
         const awaitingRecommendation = FIELD_REPORTS.filter(needsRecommendation).length;
 
         cards.push(
@@ -1378,8 +1361,8 @@ function renderNeedsAttentionList(role, needsRecommendation) {
     const list = document.getElementById("needs-attention-list");
     if (!card || !list) return;
 
-    const isApprover = role === "Owner" || role === "Manager";
-    const isReviewer = role === "Agronomist" || isApprover;
+    const isApprover = userCan("reports.approve");
+    const isReviewer = userCan("reports.view");
 
     if (!isReviewer) {
         card.style.display = "none";
@@ -1420,7 +1403,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAccountSettings();
     initChangePassword();
     initPreferences();
-    applyDemoTabRoleGating();
+    applyFormPermissions();
     loadFarm();
     loadFarmStructure();
     loadTeam();
@@ -1561,7 +1544,13 @@ async function loadActivityTrend(){
 }
 
 async function loadAllOperations(){
-    await Promise.all([loadCropOperations(),loadLivestockOperations(),loadInventoryOperations(),loadTaskOperations(),loadActivityTrend()]);
+    // Only ask the API for modules this role is allowed to see
+    const loads = [loadActivityTrend()];
+    if (userCan("crops.view")) loads.push(loadCropOperations());
+    if (userCan("livestock.view")) loads.push(loadLivestockOperations());
+    if (userCan("inventory.view")) loads.push(loadInventoryOperations());
+    if (userCan("tasks.view")) loads.push(loadTaskOperations());
+    await Promise.all(loads);
     if (typeof renderPerformanceCharts === "function") renderPerformanceCharts();
 }
 

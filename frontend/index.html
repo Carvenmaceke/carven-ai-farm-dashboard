@@ -45,22 +45,22 @@
 
   <div class="nav-section">
     <div class="nav-section-label">Farm</div>
-    <button class="tab-btn" data-tab="farms"><span class="tab-ico">▦</span><span>Farms &amp; Fields</span></button>
-    <button class="tab-btn" data-tab="structure"><span class="tab-ico">⌂</span><span>Farm Structure</span></button>
+    <button class="tab-btn" data-perm="farms.view" data-tab="farms"><span class="tab-ico">▦</span><span>Farms &amp; Fields</span></button>
+    <button class="tab-btn" data-perm="greenhouses.view" data-tab="structure"><span class="tab-ico">⌂</span><span>Farm Structure</span></button>
   </div>
 
   <div class="nav-section">
     <div class="nav-section-label">Operations</div>
-    <button class="tab-btn" data-tab="crops"><span class="tab-ico">✦</span><span>Crop Lifecycle</span></button>
-    <button class="tab-btn" data-tab="livestock"><span class="tab-ico">◐</span><span>Livestock</span></button>
-    <button class="tab-btn" data-tab="inventory"><span class="tab-ico">▣</span><span>Inventory &amp; Procurement</span></button>
-    <button class="tab-btn" data-tab="tasks"><span class="tab-ico">☑</span><span>Tasks &amp; Workforce</span></button>
+    <button class="tab-btn" data-perm="crops.view" data-tab="crops"><span class="tab-ico">✦</span><span>Crop Lifecycle</span></button>
+    <button class="tab-btn" data-perm="livestock.view" data-tab="livestock"><span class="tab-ico">◐</span><span>Livestock</span></button>
+    <button class="tab-btn" data-perm="inventory.view" data-tab="inventory"><span class="tab-ico">▣</span><span>Inventory &amp; Procurement</span></button>
+    <button class="tab-btn" data-perm="tasks.view" data-tab="tasks"><span class="tab-ico">☑</span><span>Tasks &amp; Workforce</span></button>
   </div>
 
   <div class="nav-section">
     <div class="nav-section-label">Management</div>
-    <button class="tab-btn" data-tab="users"><span class="tab-ico">◎</span><span>Users &amp; Roles</span></button>
-    <button class="tab-btn" data-tab="reports"><span class="tab-ico">▤</span><span>Reports</span><span class="tab-badge" id="reports-badge" style="display:none;"></span></button>
+    <button class="tab-btn" data-perm="users.view" data-tab="users"><span class="tab-ico">◎</span><span>Users &amp; Roles</span></button>
+    <button class="tab-btn" data-perm="reports.view reports.create" data-tab="reports"><span class="tab-ico">▤</span><span>Reports</span><span class="tab-badge" id="reports-badge" style="display:none;"></span></button>
   </div>
 
   <div class="nav-section">
@@ -105,28 +105,28 @@
 <span class="hint">Live summaries from your crop, livestock, inventory and task records.</span>
 </div>
 <div class="performance-grid">
-  <article class="performance-chart-card">
+  <article data-perm="crops.view" class="performance-chart-card">
     <div class="performance-chart-head">
       <div><h3>Crop lifecycle</h3><p>Plantings by growth stage</p></div>
       <span class="chart-live-dot">Live</span>
     </div>
     <div class="performance-chart" id="chart-crop-lifecycle" role="img" aria-label="Crop lifecycle chart"></div>
   </article>
-  <article class="performance-chart-card">
+  <article data-perm="livestock.view" class="performance-chart-card">
     <div class="performance-chart-head">
       <div><h3>Livestock status</h3><p>Current batches by status</p></div>
       <span class="chart-live-dot">Live</span>
     </div>
     <div class="performance-chart" id="chart-livestock-status" role="img" aria-label="Livestock status chart"></div>
   </article>
-  <article class="performance-chart-card">
+  <article data-perm="tasks.view" class="performance-chart-card">
     <div class="performance-chart-head">
       <div><h3>Task progress</h3><p>Workforce tasks by status</p></div>
       <span class="chart-live-dot">Live</span>
     </div>
     <div class="performance-chart" id="chart-task-progress" role="img" aria-label="Task progress chart"></div>
   </article>
-  <article class="performance-chart-card">
+  <article data-perm="inventory.view" class="performance-chart-card">
     <div class="performance-chart-head">
       <div><h3>Inventory levels</h3><p>Stock compared with reorder thresholds</p></div>
       <span class="chart-live-dot">Live</span>
@@ -169,7 +169,7 @@
 <ul class="log-list" id="critical-alerts"></ul>
 </div>
 <div class="two-col">
-<div class="card">
+<div data-perm="tasks.view" class="card">
 <div class="card-head">
 <h2>Tasks due today</h2>
 <span class="count-chip" id="tasks-count">0</span>
@@ -185,14 +185,14 @@
 <ul class="alert-list" id="overview-alerts"></ul>
 </div>
 </div>
-<div class="card">
+<div data-perm="inventory.view" class="card">
 <div class="card-head">
 <h2>Pending approvals &amp; outstanding requests</h2>
 <span class="hint">Purchase requests awaiting sign-off</span>
 </div>
 <ul class="log-list" id="pending-approvals"></ul>
 </div>
-<div class="card">
+<div data-perm="inventory.view" class="card">
 <div class="card-head">
 <h2>Supplier order status</h2>
 <span class="hint">What's been ordered vs. what's actually arrived</span>
@@ -201,7 +201,7 @@
 </div>
 </section>
 <!-- FARMS & FIELDS (Track A) -->
-<section class="panel" id="panel-farms">
+<section class="panel" data-perm="farms.view" id="panel-farms">
 <div class="panel-head">
 <h1>Farms, fields &amp; access</h1>
 <p>Core farm structure — multi-farm registration, fields/plots, assets, and who has access.</p>
@@ -258,7 +258,7 @@
 </div>
 </form>
 </div>
-</section><section class="panel" id="panel-structure"><div class="panel-head"><h1>Farm Structure</h1><p>Manage your greenhouses and growing zones. Changes are saved directly to the farm database.</p></div><div class="two-col">
+</section><section class="panel" data-perm="greenhouses.view" id="panel-structure"><div class="panel-head"><h1>Farm Structure</h1><p>Manage your greenhouses and growing zones. Changes are saved directly to the farm database.</p></div><div class="two-col">
 <div class="card">
 <div class="card-head">
 <h2>Greenhouses</h2>
@@ -305,7 +305,7 @@
 </div>
 </div><div class="card structure-info-card"><div class="card-head"><h2>How it works</h2></div><p class="hint">Create a greenhouse first, then select it when adding a growing zone. Owners and Managers can create structure records; other roles can view them according to their permissions.</p></div></section>
 <!-- CROP LIFECYCLE (Track B) -->
-<section class="panel" id="panel-crops">
+<section class="panel" data-perm="crops.view" id="panel-crops">
 <div class="panel-head">
 <h1>Crop lifecycle &amp; planning</h1>
 <p>Varieties, planting schedules, growth stages, treatments and harvest records.</p>
@@ -415,7 +415,7 @@
 </div>
 </section>
 <!-- LIVESTOCK (Track C) -->
-<section class="panel" id="panel-livestock">
+<section class="panel" data-perm="livestock.view" id="panel-livestock">
 <div class="panel-head">
 <h1>Livestock &amp; poultry operations</h1>
 <p>Batches, health, vaccinations, feed and production.</p>
@@ -505,7 +505,7 @@
 </div>
 </section>
 <!-- INVENTORY & PROCUREMENT (Track D) -->
-<section class="panel" id="panel-inventory">
+<section class="panel" data-perm="inventory.view" id="panel-inventory">
 <div class="panel-head">
 <h1>Inventory, procurement &amp; financials</h1>
 <p>Stock levels, suppliers, purchase requests/orders and operating costs.</p>
@@ -577,7 +577,7 @@
 </div>
 </form>
 </div>
-<div class="card" id="finance-card">
+<div class="card" data-perm="finance.view" id="finance-card">
 <div class="card-head">
 <h2>Operating costs</h2>
 <span class="hint">Add, edit and export cost records</span>
@@ -625,7 +625,7 @@
 </div>
 </section>
 <!-- TASKS & WORKFORCE -->
-<section class="panel" id="panel-tasks">
+<section class="panel" data-perm="tasks.view" id="panel-tasks">
 <div class="panel-head">
 <h1>Tasks &amp; workforce management</h1>
 <p>Assign, prioritize and track daily work across the team.</p>
@@ -679,7 +679,7 @@
 </div>
 </section>
 <!-- REPORTS -->
-<section class="panel" id="panel-reports">
+<section class="panel" data-perm="reports.view reports.create" id="panel-reports">
 <div class="panel-head">
 <h1>Reports &amp; operational records</h1>
 <p>Farm activity history in one place, filterable by type and search.</p>
@@ -779,7 +779,7 @@
 </div>
 </section>
 <!-- USERS & ROLES (moved out of Settings - this is core, frequent work, not a settings screen) -->
-<section class="panel" id="panel-users">
+<section class="panel" data-perm="users.view" id="panel-users">
 <div class="panel-head">
 <h1>Users &amp; roles</h1>
 <p>Who has access to this farm, and what they can do.</p>

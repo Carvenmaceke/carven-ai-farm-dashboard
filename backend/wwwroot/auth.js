@@ -9,6 +9,53 @@ const API_BASE_URL = window.location.hostname === "localhost"
 
 
 /* =====================================
+   SESSION STORAGE / REMEMBER ME
+===================================== */
+
+function activeStorage() {
+    return localStorage.getItem("rememberMe") === "true" ? localStorage : sessionStorage;
+}
+
+function getSessionValue(key) {
+    return activeStorage().getItem(key);
+}
+
+// Migrate old builds that stored every token in localStorage without a
+// Remember Me choice. Those tokens should not become persistent sessions.
+if (localStorage.getItem("token") && localStorage.getItem("rememberMe") !== "true") {
+    ["token", "rememberMe", "userId", "username", "email", "role", "farmId"].forEach(key => {
+        localStorage.removeItem(key);
+    });
+}
+
+function setSessionValue(key, value) {
+    activeStorage().setItem(key, value);
+}
+
+function clearSessionStorage() {
+    localStorage.clear();
+    sessionStorage.clear();
+}
+
+function saveLoginSession(data, email, rememberMe) {
+    ["token", "rememberMe", "userId", "username", "email", "role", "farmId"].forEach(key => {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
+    });
+
+    const storage = rememberMe ? localStorage : sessionStorage;
+    storage.setItem("token", data.token);
+    storage.setItem("rememberMe", String(rememberMe));
+    if (data.userId !== undefined) storage.setItem("userId", data.userId);
+    if (data.username) storage.setItem("username", data.username);
+    storage.setItem("email", data.email || email);
+    if (data.role) storage.setItem("role", data.role);
+    if (data.farmId !== undefined && data.farmId !== null) {
+        storage.setItem("farmId", data.farmId);
+    }
+}
+
+/* =====================================
    TABS
 ===================================== */
 
@@ -127,15 +174,7 @@ loginForm.addEventListener("submit", async (event) => {
             return;
         }
 
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("rememberMe", String(rememberMe));
-        if (data.userId !== undefined) localStorage.setItem("userId", data.userId);
-        if (data.username) localStorage.setItem("username", data.username);
-        localStorage.setItem("email", data.email || email);
-        if (data.role) localStorage.setItem("role", data.role);
-        if (data.farmId !== undefined && data.farmId !== null) {
-            localStorage.setItem("farmId", data.farmId);
-        }
+        saveLoginSession(data, email, rememberMe);
 
         window.location.assign("./index.html");
 
@@ -229,12 +268,140 @@ registerForm.addEventListener("submit", async (event) => {
 
 
 /* =====================================
-   FORGOT PASSWORD (stub)
+   FORGOT / RESET PASSWORD
 ===================================== */
+
+const forgotPanel = document.getElementById("forgotPanel");
+const resetPanel = document.getElementById("resetPanel");
+const forgotForm = document.getElementById("forgotForm");
+const resetForm = document.getElementById("resetForm");
+
+function showOnlyAuthPanel(panel) {
+    [loginForm, registerForm, forgotPanel, resetPanel].forEach(form => {
+        if (form) form.classList.remove("active");
+    });
+    [forgotPanel, resetPanel].forEach(p => {
+        if (p) p.hidden = p !== panel;
+    });
+
+    if (panel === loginForm) {
+        loginForm.classList.add("active");
+        forgotPanel.hidden = true;
+        resetPanel.hidden = true;
+    } else if (panel === forgotPanel || panel === resetPanel) {
+        panel.hidden = false;
+        panel.classList.add("active");
+    }
+
+    clearBanner();
+}
 
 document.getElementById("forgotPassword").addEventListener("click", (event) => {
     event.preventDefault();
-    alert("Forgot password isn't built yet - see docs for what's still outstanding.");
+    document.getElementById("forgotEmail").value = document.getElementById("loginEmail").value.trim();
+    showOnlyAuthPanel(forgotPanel);
+});
+
+document.getElementById("backToLoginFromForgot").addEventListener("click", () => {
+    forgotPanel.hidden = true;
+    showOnlyAuthPanel(loginForm);
+});
+
+forgotForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    clearBanner();
+
+    const email = document.getElementById("forgotEmail").value.trim();
+    const button = document.getElementById("forgotSubmit");
+    setLoading(button, true);
+
+    try {
+        const { response, data } = await apiJson("/api/Auth/forgot-password", {
+            method: "POST",
+            body: JSON.stringify({ email })
+        });
+
+        if (!response.ok) {
+            showBanner(data.message || "Could not start password reset.", "error");
+            return;
+        }
+
+        const devLink = document.getElementById("developmentResetLink");
+        if (data.developmentResetLink) {
+            devLink.hidden = false;
+            devLink.innerHTML = `Development reset link: <a href="${data.developmentResetLink}">Open reset page</a>`;
+        } else {
+            devLink.hidden = true;
+        }
+
+        showBanner(data.message || "If the account exists, a reset link has been sent.", "success");
+    } catch (error) {
+        showBanner(connectionMessage(error), "error");
+    } finally {
+        setLoading(button, false);
+    }
+});
+
+function getResetTokenFromHash() {
+    const match = window.location.hash.match(/^#reset=(.+)$/);
+    return match ? decodeURIComponent(match[1]) : null;
+}
+
+const resetToken = getResetTokenFromHash();
+if (resetToken) {
+    showOnlyAuthPanel(resetPanel);
+}
+
+resetForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    clearBanner();
+
+    const token = getResetTokenFromHash();
+    const newPassword = document.getElementById("resetPassword").value;
+    const confirmPassword = document.getElementById("resetConfirmPassword").value;
+
+    if (!token) {
+        showBanner("This reset link is missing or invalid.", "error");
+        return;
+    }
+
+    if (newPassword.length < 8) {
+        showBanner("Password must be at least 8 characters.", "error");
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        showBanner("Passwords do not match.", "error");
+        return;
+    }
+
+    const button = document.getElementById("resetSubmit");
+    setLoading(button, true);
+
+    try {
+        const { response, data } = await apiJson("/api/Auth/reset-password", {
+            method: "POST",
+            body: JSON.stringify({
+                token,
+                newPassword,
+                confirmPassword
+            })
+        });
+
+        if (!response.ok) {
+            showBanner(data.message || "Password reset failed.", "error");
+            return;
+        }
+
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+        resetForm.reset();
+        showOnlyAuthPanel(loginForm);
+        showBanner(data.message || "Password reset successfully. You can now sign in.", "success");
+    } catch (error) {
+        showBanner(connectionMessage(error), "error");
+    } finally {
+        setLoading(button, false);
+    }
 });
 
 
@@ -243,6 +410,6 @@ document.getElementById("forgotPassword").addEventListener("click", (event) => {
    THE DASHBOARD
 ===================================== */
 
-if (localStorage.getItem("token")) {
+if (getSessionValue("token")) {
     window.location.assign("./index.html");
 }

@@ -83,6 +83,7 @@ public class OperationsController : ControllerBase
     }
 
     [HttpGet("crops")]
+    [Authorize(Policy = Permissions.CropsView)]
     public async Task<IActionResult> GetCrops(CancellationToken ct)
     {
         var u = await CurrentUser(ct); if (u is null) return Unauthorized(); if (!u.FarmId.HasValue) return NoFarm();
@@ -149,6 +150,7 @@ public class OperationsController : ControllerBase
     public Task<IActionResult> DeleteHarvest(int id,CancellationToken ct)=>DeleteByFarm(_db.HarvestRecords,id,ct);
 
     [HttpGet("livestock")]
+    [Authorize(Policy = Permissions.LivestockView)]
     public async Task<IActionResult> GetLivestock(CancellationToken ct)
     { var u=await CurrentUser(ct);if(u is null)return Unauthorized();if(!u.FarmId.HasValue)return NoFarm();var f=u.FarmId.Value;return Ok(new{batches=await _db.LivestockBatches.AsNoTracking().Where(x=>x.FarmId==f).ToListAsync(ct),health=await _db.LivestockHealthRecords.AsNoTracking().Where(x=>x.FarmId==f).OrderByDescending(x=>x.Id).ToListAsync(ct),vaccinations=await _db.LivestockVaccinations.AsNoTracking().Where(x=>x.FarmId==f).OrderBy(x=>x.Due).ToListAsync(ct),logs=await _db.LivestockLogs.AsNoTracking().Where(x=>x.FarmId==f).OrderByDescending(x=>x.Id).ToListAsync(ct),production=await _db.LivestockProductions.AsNoTracking().Where(x=>x.FarmId==f).OrderByDescending(x=>x.Id).ToListAsync(ct),breeding=await _db.LivestockBreedings.AsNoTracking().Where(x=>x.FarmId==f).OrderByDescending(x=>x.Id).ToListAsync(ct)}); }
 
@@ -201,8 +203,9 @@ public class OperationsController : ControllerBase
     public Task<IActionResult> DeleteBreeding(int id,CancellationToken ct)=>DeleteByFarm(_db.LivestockBreedings,id,ct);
 
     [HttpGet("inventory")]
+    [Authorize(Policy = Permissions.InventoryView)]
     public async Task<IActionResult> GetInventory(CancellationToken ct)
-    { var u=await CurrentUser(ct);if(u is null)return Unauthorized();if(!u.FarmId.HasValue)return NoFarm();var f=u.FarmId.Value;return Ok(new{items=await _db.InventoryItems.AsNoTracking().Where(x=>x.FarmId==f).ToListAsync(ct),usage=await _db.InventoryUsages.AsNoTracking().Where(x=>x.FarmId==f).OrderByDescending(x=>x.Id).ToListAsync(ct),suppliers=await _db.Suppliers.AsNoTracking().Where(x=>x.FarmId==f).ToListAsync(ct),purchases=await _db.PurchaseLogs.AsNoTracking().Where(x=>x.FarmId==f).OrderByDescending(x=>x.Id).ToListAsync(ct),costs=await _db.OperatingCosts.AsNoTracking().Where(x=>x.FarmId==f).OrderByDescending(x=>x.Id).ToListAsync(ct)}); }
+    { var u=await CurrentUser(ct);if(u is null)return Unauthorized();if(!u.FarmId.HasValue)return NoFarm();var f=u.FarmId.Value;return Ok(new{items=await _db.InventoryItems.AsNoTracking().Where(x=>x.FarmId==f).ToListAsync(ct),usage=await _db.InventoryUsages.AsNoTracking().Where(x=>x.FarmId==f).OrderByDescending(x=>x.Id).ToListAsync(ct),suppliers=await _db.Suppliers.AsNoTracking().Where(x=>x.FarmId==f).ToListAsync(ct),purchases=await _db.PurchaseLogs.AsNoTracking().Where(x=>x.FarmId==f).OrderByDescending(x=>x.Id).ToListAsync(ct),costs=User.HasClaim("permission",Permissions.FinanceView)?await _db.OperatingCosts.AsNoTracking().Where(x=>x.FarmId==f).OrderByDescending(x=>x.Id).ToListAsync(ct):new List<OperatingCost>()}); }
     [HttpPost("inventory/items")]
     [Authorize(Policy = Permissions.InventoryManage)]
     public async Task<IActionResult> AddInventory(InventoryItemDto d,CancellationToken ct)=>await AddEntity(d,(u,x)=>new InventoryItem{FarmId=u.FarmId!.Value,Item=x.Item,Category=x.Category,Quantity=x.Quantity,Unit=x.Unit,Reorder=x.Reorder},_db.InventoryItems,ct);
@@ -235,6 +238,7 @@ public class OperationsController : ControllerBase
     public async Task<IActionResult> AddCost(OperatingCostDto d,CancellationToken ct)=>await AddEntity(d,(u,x)=>new OperatingCost{FarmId=u.FarmId!.Value,Date=x.Date,Category=x.Category,Description=x.Description,Amount=x.Amount},_db.OperatingCosts,ct);
 
     [HttpGet("tasks")]
+    [Authorize(Policy = Permissions.TasksView)]
     public async Task<IActionResult> GetTasks(CancellationToken ct)
     { var u=await CurrentUser(ct);if(u is null)return Unauthorized();if(!u.FarmId.HasValue)return NoFarm();var f=u.FarmId.Value;return Ok(new{tasks=await _db.FarmTasks.AsNoTracking().Where(x=>x.FarmId==f).OrderBy(x=>x.Deadline).ToListAsync(ct),history=await _db.TaskHistories.AsNoTracking().Where(x=>x.FarmId==f).OrderByDescending(x=>x.Id).Take(100).ToListAsync(ct)}); }
     [HttpPost("tasks")]
